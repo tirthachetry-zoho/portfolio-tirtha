@@ -19,7 +19,7 @@ const timeline = [
   { year: "2023", title: "Software Engineer", company: "Grid Dynamics", description: "Developed scalable microservices architecture using Java and Quarkus", icon: Briefcase },
   { year: "2022", title: "Software Engineer", company: "Amdocs", description: "Worked on Order Management System (OMS) for telecom clients", icon: Briefcase },
   { year: "2021", title: "Software Developer", company: "Amdocs", description: "Developed scalable software solutions for diverse client needs", icon: Briefcase },
-  { year: "2020", title: "Computer Science Degree", company: "NIT Silchar", description: "Graduated with honors", icon: GraduationCap },
+  { year: "2019", title: "Computer Science Degree", company: "NIT Silchar", description: "Graduated with honors", icon: GraduationCap },
 ];
 
 export function About() {

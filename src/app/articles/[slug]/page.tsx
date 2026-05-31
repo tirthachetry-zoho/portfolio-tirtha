@@ -1,7 +1,10 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import { motion } from "framer-motion";
 import { Calendar, Clock, Tag, ArrowLeft, Share2 } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 const posts = {
   "building-agentic-ai-systems": {
@@ -84,11 +87,9 @@ const posts = {
   },
 };
 
-export async function generateStaticParams() {
-  return Object.keys(posts).map((slug) => ({ slug }));
-}
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
+export default function ArticlePage() {
+  const params = useParams();
   const post = posts[params.slug as keyof typeof posts];
 
   if (!post) {
