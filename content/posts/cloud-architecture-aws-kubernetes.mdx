@@ -1,0 +1,166 @@
+---
+title: "Modern Cloud Architecture with AWS and Kubernetes"
+description: "Best practices for designing and deploying cloud-native applications using AWS services and Kubernetes orchestration."
+date: "2024-05-05"
+tags: ["AWS", "Kubernetes", "Cloud Native"]
+category: "Cloud"
+readingTime: "10 min read"
+published: true
+---
+
+Cloud-native architecture enables applications to leverage the full potential of cloud computing. This guide covers best practices using AWS and Kubernetes.
+
+## Cloud-Native Principles
+
+1. **Microservices**: Decompose applications into small, independent services
+2. **Containers**: Package applications with their dependencies
+3. **Dynamic Orchestration**: Automate deployment and scaling
+4. **Continuous Delivery**: Implement CI/CD pipelines
+5. **Resilience**: Design for failure and self-healing
+
+## AWS Services for Cloud-Native Apps
+
+### Compute
+- **EKS**: Managed Kubernetes service
+- **Lambda**: Serverless compute
+- **Fargate**: Serverless containers
+
+### Storage
+- **S3**: Object storage
+- **EBS**: Block storage
+- **EFS**: File storage
+
+### Networking
+- **VPC**: Private network isolation
+- **ALB/NLB**: Load balancing
+- **CloudFront**: CDN
+
+## Kubernetes Deployment
+
+### Deployment Manifest
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+```
+
+### Service Configuration
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: LoadBalancer
+```
+
+## Infrastructure as Code
+
+### Terraform Example
+```hcl
+resource "aws_eks_cluster" "myapp" {
+  name     = "myapp-cluster"
+  role_arn = aws_iam_role.eks_cluster.arn
+
+  vpc_config {
+    subnet_ids = aws_subnet.private[*].id
+  }
+}
+
+resource "aws_eks_node_group" "myapp" {
+  cluster_name = aws_eks_cluster.myapp.name
+  node_role_arn = aws_iam_role.eks_nodes.arn
+  subnet_ids   = aws_subnet.private[*].id
+
+  scaling_config {
+    desired_size = 3
+    max_size     = 5
+    min_size     = 1
+  }
+}
+```
+
+## Monitoring and Observability
+
+### Prometheus + Grafana
+```yaml
+# Prometheus Config
+scrape_configs:
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+```
+
+### CloudWatch Integration
+```javascript
+const AWS = require('aws-sdk');
+const cloudwatch = new AWS.CloudWatch();
+
+function publishMetric(metricName, value, unit) {
+  const params = {
+    MetricData: [{
+      MetricName: metricName,
+      Value: value,
+      Unit: unit
+    }],
+    Namespace: 'MyApp'
+  };
+  
+  return cloudwatch.putMetricData(params).promise();
+}
+```
+
+## Security Best Practices
+
+1. **Network Policies**: Restrict pod-to-pod communication
+2. **Secrets Management**: Use AWS Secrets Manager or Kubernetes Secrets
+3. **IAM Roles**: Assign least-privilege permissions
+4. **Image Scanning**: Scan container images for vulnerabilities
+5. **Pod Security**: Implement security contexts and policies
+
+## Cost Optimization
+
+1. **Right-sizing**: Choose appropriate instance types
+2. **Auto-scaling**: Scale resources based on demand
+3. **Spot Instances**: Use spot instances for fault-tolerant workloads
+4. **Reserved Instances**: Commit to long-term usage for discounts
+5. **Resource Limits**: Set appropriate resource requests and limits
+
+## Conclusion
+
+Building cloud-native applications requires understanding both the platform (AWS) and orchestration (Kubernetes). Start with simple deployments and gradually adopt more advanced patterns as your requirements grow.
+
+The key is to design for scalability, resilience, and cost-efficiency from the beginning.
