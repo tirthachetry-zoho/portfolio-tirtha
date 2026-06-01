@@ -66,7 +66,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </div>
 
           <div className="flex flex-wrap gap-2 mb-8">
-            {post.tags?.map((tag) => (
+            {post.tags?.map((tag: string) => (
               <span key={tag} className="flex items-center gap-1 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-sm">
                 <Tag className="w-3 h-3" />
                 {tag}

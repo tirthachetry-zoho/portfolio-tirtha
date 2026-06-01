@@ -1,6 +1,6 @@
 import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/server";
 
 const categories = ["All", "AI", "Software Engineering", "System Design", "Cloud", "Productivity", "Open Source", "Career Growth", "Automation"];
 
@@ -8,7 +8,7 @@ export async function Articles() {
   let articlesList: any[] = [];
   
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data: articles } = await supabase
       .from("blogs")
       .select("*")
@@ -99,7 +99,7 @@ export async function Articles() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {article.tags?.slice(0, 3).map((tag) => (
+                  {article.tags?.slice(0, 3).map((tag: string) => (
                     <span key={tag} className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Tag className="w-3 h-3" />
                       {tag}
