@@ -13,6 +13,7 @@ const navItems = [
   { name: "AI Lab", href: "/#ai-lab" },
   { name: "Open Source", href: "/#open-source" },
   { name: "Contact", href: "/#contact" },
+  { name: "Admin", href: "/admin", protected: true },
 ];
 
 export function Navigation() {
