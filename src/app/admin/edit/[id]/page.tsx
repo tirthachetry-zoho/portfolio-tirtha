@@ -26,6 +26,7 @@ export default function EditBlogPage() {
     tags: "",
     readingTime: "",
     published: false,
+    published_at: null as string | null,
   });
 
   const [error, setError] = useState("");
@@ -54,6 +55,7 @@ export default function EditBlogPage() {
         tags: blog.tags?.join(", ") || "",
         readingTime: blog.reading_time || "",
         published: blog.published,
+        published_at: blog.published_at || null,
       });
       setCoverImage(blog.cover_image_url);
     } catch (error: any) {
