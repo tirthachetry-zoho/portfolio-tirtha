@@ -6,13 +6,24 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, FileText, LogOut, Trash2 } from "lucide-react";
 
+interface Post {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  date: string;
+  readingTime: string;
+  tags: string[];
+  published: boolean;
+}
+
 export default function AdminDashboard() {
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
 
-  const fetchBlogs = async () => {
+  const fetchPosts = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -20,40 +31,36 @@ export default function AdminDashboard() {
         return;
       }
 
-      const { data } = await supabase
-        .from("blogs")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      setBlogs(data || []);
+      // Fetch posts from API endpoint
+      const response = await fetch('/api/admin/posts');
+      const data = await response.json();
+      setPosts(data || []);
     } catch (error) {
-      console.error("Error fetching blogs:", error);
+      console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (blogId: string) => {
-    if (!confirm("Are you sure you want to delete this blog?")) return;
+  const handleDelete = async (slug: string) => {
+    if (!confirm("Are you sure you want to delete this article?")) return;
 
     try {
-      const { error } = await supabase
-        .from("blogs")
-        .delete()
-        .eq("id", blogId);
+      const response = await fetch(`/api/admin/posts/${slug}`, {
+        method: 'DELETE',
+      });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to delete post');
       
-      // Refresh the blogs list
-      fetchBlogs();
+      // Refresh the posts list
+      fetchPosts();
     } catch (error: any) {
       alert(error.message);
     }
   };
 
   useEffect(() => {
-    fetchBlogs();
+    fetchPosts();
   }, []);
 
   return (
@@ -70,61 +77,61 @@ export default function AdminDashboard() {
               className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all"
             >
               <Plus className="w-5 h-5" />
-              New Blog
+              New Article
             </Link>
           </div>
         </div>
 
         <div className="bg-card border rounded-xl overflow-hidden">
           <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold">Your Blogs</h2>
+            <h2 className="text-xl font-semibold">Your Articles</h2>
           </div>
           
-          {blogs && blogs.length > 0 ? (
+          {posts && posts.length > 0 ? (
             <div className="divide-y">
-              {blogs.map((blog) => (
+              {posts.map((post) => (
                 <div
-                  key={blog.id}
+                  key={post.slug}
                   className="p-6 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-lg">{blog.title}</h3>
+                        <h3 className="font-semibold text-lg">{post.title}</h3>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            blog.published
+                            post.published
                               ? "bg-green-500/10 text-green-500"
                               : "bg-yellow-500/10 text-yellow-500"
                           }`}
                         >
-                          {blog.published ? "Published" : "Draft"}
+                          {post.published ? "Published" : "Draft"}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                        {blog.description}
+                        {post.description}
                       </p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{blog.category}</span>
-                        <span>{new Date(blog.created_at).toLocaleDateString()}</span>
+                        <span>{post.category}</span>
+                        <span>{new Date(post.date).toLocaleDateString()}</span>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Link
-                        href={`/admin/edit/${blog.id}`}
+                        href={`/admin/edit/${post.slug}`}
                         className="px-4 py-2 border rounded-lg hover:bg-primary hover:text-primary-foreground transition-all text-sm"
                       >
                         Edit
                       </Link>
                       <Link
-                        href={`/articles/${blog.slug}`}
+                        href={`/articles/${post.slug}`}
                         target="_blank"
                         className="px-4 py-2 border rounded-lg hover:bg-muted transition-all text-sm"
                       >
                         View
                       </Link>
                       <button
-                        onClick={() => handleDelete(blog.id)}
+                        onClick={() => handleDelete(post.slug)}
                         className="px-4 py-2 border rounded-lg hover:bg-destructive hover:text-destructive-foreground transition-all text-sm"
                       >
                         <Trash2 className="w-4 h-4" />
