@@ -1,0 +1,114 @@
+---
+title: "Why IF NOT EXISTS is Discouraged in Liquibase"
+description: "Learn why using IF NOT EXISTS in Liquibase changesets can mask schema drift and reduce visibility of errors, and discover better alternatives like preconditions."
+date: "2024-06-12"
+tags: ["Liquibase", "Database", "DevOps", "Best Practices"]
+category: "Software Engineering"
+readingTime: "5 min read"
+published: true
+---
+
+In Liquibase, using SQL like:
+
+```sql
+CREATE TABLE IF NOT EXISTS customer (
+    id BIGINT PRIMARY KEY
+);
+```
+
+is generally discouraged because Liquibase already provides its own mechanism for tracking database state. Adding `IF NOT EXISTS` can actually hide problems.
+
+## 1. Liquibase already guarantees one-time execution
+
+Liquibase records every executed changeset in the `DATABASECHANGELOG` table.
+
+```xml
+<changeSet id="1" author="me">
+    <createTable tableName="customer">
+        ...
+    </createTable>
+</changeSet>
+```
+
+If the changeset has already run, Liquibase won't run it again. So `IF NOT EXISTS` is redundant.
+
+## 2. It can mask schema drift
+
+Suppose someone manually created the table with a different structure:
+
+```sql
+CREATE TABLE customer (
+    id INT
+);
+```
+
+Then your changeset:
+
+```sql
+CREATE TABLE IF NOT EXISTS customer (
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(100)
+);
+```
+
+will silently do nothing.
+
+Liquibase marks the changeset as executed, but the database schema is now incorrect and missing columns. This can lead to hard-to-diagnose production issues.
+
+## 3. Reduces visibility of errors
+
+Without `IF NOT EXISTS`, Liquibase fails immediately:
+
+```
+Table CUSTOMER already exists
+```
+
+This tells you:
+- someone changed the database manually,
+- changesets are out of sync,
+- or environments differ.
+
+Failing fast is usually better than silently continuing.
+
+## 4. Database portability
+
+`IF NOT EXISTS` syntax is not supported consistently across databases:
+- PostgreSQL ✓
+- MySQL ✓
+- SQL Server (limited)
+- Oracle ✗ (older versions)
+
+Some databases use different syntax.
+
+Liquibase's built-in change types (createTable, addColumn, etc.) generate database-specific SQL automatically.
+
+## 5. Prefer preconditions if needed
+
+If you genuinely need conditional execution, use Liquibase preconditions:
+
+```xml
+<changeSet id="1" author="me">
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <tableExists tableName="customer"/>
+        </not>
+    </preConditions>
+
+    <createTable tableName="customer">
+        ...
+    </createTable>
+</changeSet>
+```
+
+This keeps the condition visible and managed by Liquibase.
+
+## When is IF NOT EXISTS acceptable?
+
+Mostly when:
+- running ad-hoc SQL outside Liquibase,
+- writing scripts that must be idempotent without changelog tracking,
+- dealing with legacy databases where schema state is uncertain.
+
+## Best Practice
+
+Trust Liquibase's changelog mechanism and let unexpected objects cause failures rather than hiding them with `IF NOT EXISTS`.

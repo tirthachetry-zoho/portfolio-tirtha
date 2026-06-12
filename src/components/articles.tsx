@@ -1,26 +1,53 @@
 import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
 import Link from "next/link";
-import { createPublicClient } from "@/lib/supabase/server";
+import { readdir, readFile } from "fs/promises";
+import { join } from "path";
 
 const categories = ["All", "AI", "Software Engineering", "System Design", "Cloud", "Productivity", "Open Source", "Career Growth", "Automation"];
 
-export async function Articles() {
-  let articlesList: any[] = [];
-  
-  try {
-    const supabase = createPublicClient();
-    const { data: articles } = await supabase
-      .from("blogs")
-      .select("*")
-      .eq("published", true)
-      .order("published_at", { ascending: false })
-      .limit(3);
+async function getPosts() {
+  const postsDir = join(process.cwd(), 'content/posts');
+  const files = await readdir(postsDir);
+  const mdxFiles = files.filter(f => f.endsWith('.mdx'));
 
-    articlesList = articles || [];
-  } catch (error) {
-    console.error("Error fetching articles:", error);
-    // Return empty array on error to avoid breaking the UI
-  }
+  const posts = await Promise.all(mdxFiles.map(async (filename) => {
+    const filePath = join(postsDir, filename);
+    const content = await readFile(filePath, 'utf-8');
+    
+    // Parse frontmatter
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    const frontmatter: any = {};
+    
+    if (frontmatterMatch) {
+      const lines = frontmatterMatch[1].split('\n');
+      lines.forEach(line => {
+        const match = line.match(/^(\w+):\s*(.*)$/);
+        if (match) {
+          const key = match[1];
+          let value = match[2];
+          // Handle arrays
+          if (value.startsWith('[') && value.endsWith(']')) {
+            value = value.slice(1, -1).split(',').map(v => v.trim().replace(/"/g, ''));
+          }
+          // Handle booleans
+          if (value === 'true') value = true;
+          if (value === 'false') value = false;
+          frontmatter[key] = value;
+        }
+      });
+    }
+
+    return {
+      ...frontmatter,
+      slug: filename.replace('.mdx', ''),
+    };
+  }));
+
+  return posts.filter(post => post.published).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export async function Articles() {
+  const articlesList = (await getPosts()).slice(0, 3);
 
   return (
     <section id="articles" className="py-24">
@@ -57,11 +84,11 @@ export async function Articles() {
               <div className="flex items-center gap-6 text-sm text-muted-foreground mb-6">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  {new Date(articlesList[0].published_at || articlesList[0].created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                  {new Date(articlesList[0].date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  {articlesList[0].reading_time}
+                  {articlesList[0].readingTime}
                 </div>
               </div>
               <Link
@@ -91,11 +118,11 @@ export async function Articles() {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {new Date(article.published_at || article.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    {new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    {article.reading_time}
+                    {article.readingTime}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">

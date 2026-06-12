@@ -1,16 +1,51 @@
 import { Calendar, Clock, Tag, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { readdir, readFile } from "fs/promises";
+import { join } from "path";
+
+async function getPosts() {
+  const postsDir = join(process.cwd(), 'content/posts');
+  const files = await readdir(postsDir);
+  const mdxFiles = files.filter(f => f.endsWith('.mdx'));
+
+  const posts = await Promise.all(mdxFiles.map(async (filename) => {
+    const filePath = join(postsDir, filename);
+    const content = await readFile(filePath, 'utf-8');
+    
+    // Parse frontmatter
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    const frontmatter: any = {};
+    
+    if (frontmatterMatch) {
+      const lines = frontmatterMatch[1].split('\n');
+      lines.forEach(line => {
+        const match = line.match(/^(\w+):\s*(.*)$/);
+        if (match) {
+          const key = match[1];
+          let value = match[2];
+          // Handle arrays
+          if (value.startsWith('[') && value.endsWith(']')) {
+            value = value.slice(1, -1).split(',').map(v => v.trim().replace(/"/g, ''));
+          }
+          // Handle booleans
+          if (value === 'true') value = true;
+          if (value === 'false') value = false;
+          frontmatter[key] = value;
+        }
+      });
+    }
+
+    return {
+      ...frontmatter,
+      slug: filename.replace('.mdx', ''),
+    };
+  }));
+
+  return posts.filter(post => post.published).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
 
 export default async function ArticlesPage() {
-  const supabase = await createClient();
-  const { data: posts } = await supabase
-    .from("blogs")
-    .select("*")
-    .eq("published", true)
-    .order("published_at", { ascending: false });
-
-  const publishedPosts = posts || [];
+  const publishedPosts = await getPosts();
 
   return (
     <div className="min-h-screen py-24">
@@ -38,11 +73,11 @@ export default async function ArticlesPage() {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {new Date(post.published_at || post.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    {new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    {post.reading_time}
+                    {post.readingTime}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-4">
