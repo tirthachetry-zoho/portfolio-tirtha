@@ -15,11 +15,11 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <h3 className="font-bold text-xl mb-4">
-              <span className="text-primary">Tirtha</span>
-              <span className="text-secondary">Chetry</span>
+              <span className="text-primary">Engineering</span>
+              <span className="text-secondary">Blogs</span>
             </h3>
             <p className="text-muted-foreground mb-4 max-w-md">
-              Building intelligent systems, AI-powered applications, and scalable software for the future.
+              Engineering insights, architecture patterns, and practical lessons from building scalable distributed systems.
             </p>
             <div className="flex items-center space-x-4">
               <a

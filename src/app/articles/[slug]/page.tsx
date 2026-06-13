@@ -5,6 +5,7 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import ArticleContent from "./ArticleContent";
+import Mermaid from "@/components/Mermaid";
 
 async function getPost(slug: string) {
   const filePath = join(process.cwd(), 'content/posts', `${slug}.mdx`);
@@ -77,7 +78,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           readingTime={post.readingTime}
           tags={post.tags}
         >
-          <MDXRemote source={post.content} />
+          <MDXRemote 
+            source={post.content} 
+            components={{
+              Mermaid: ({ chart }: { chart: string }) => <Mermaid chart={chart} />,
+            }}
+          />
         </ArticleContent>
       </div>
     </div>

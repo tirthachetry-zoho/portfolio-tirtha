@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown, GitBranch, Link as LinkIcon, Mail, Sparkles, Code, Cpu, Database, Cloud } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 
 const techIcons = [
   { icon: Code, color: "text-blue-500" },
@@ -12,6 +13,14 @@ const techIcons = [
 ];
 
 export function Hero() {
+  const yearsOfExperience = useMemo(() => {
+    const startDate = new Date("2019-06-01"); // Start date for career
+    const currentDate = new Date();
+    const years = currentDate.getFullYear() - startDate.getFullYear();
+    const months = currentDate.getMonth() - startDate.getMonth();
+    return months < 0 ? years - 1 : years;
+  }, []);
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -48,7 +57,7 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-primary"
           >
-            Tirtha Chetry
+            Engineering Blogs
           </motion.h1>
 
           <motion.p
@@ -57,16 +66,25 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-xl sm:text-2xl text-muted-foreground mb-4 max-w-3xl mx-auto"
           >
-            Building intelligent systems, AI-powered applications, and scalable software for the future.
+            Senior Software Engineer with {yearsOfExperience} years of experience building scalable distributed systems across FinTech, Order Management Systems (OMS), and Warehouse Management Systems (WMS).
           </motion.p>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-lg text-muted-foreground mb-4 max-w-2xl mx-auto"
+          >
+            I work primarily with Java, Spring Boot, Quarkus, AWS, and cloud-native architectures. Recently, I've been exploring Generative AI, RAG pipelines, and Spring AI to build intelligent applications.
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
             className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto"
           >
-            Software Engineer passionate about AI, Automation, Cloud Engineering, Open Source, Developer Productivity, and Modern System Design.
+            Through this profile, I share engineering insights, architecture patterns, practical lessons, and hands-on experiences from real-world systems.
           </motion.p>
 
           <motion.div

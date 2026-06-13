@@ -17,24 +17,28 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tirtha Chetry | AI Engineer & Software Developer",
-  description: "Personal website of Tirtha Chetry featuring AI projects, software engineering articles, open-source contributions, system design insights, automation experiments, and technology research.",
-  keywords: ["AI Engineer", "Software Developer", "Open Source", "System Design", "Automation", "Cloud Engineering", "Technical Writing"],
-  authors: [{ name: "Tirtha Chetry" }],
-  creator: "Tirtha Chetry",
+  title: "Engineering Blogs by Tirtha",
+  description: "Engineering insights, architecture patterns, and practical lessons from building scalable distributed systems across FinTech, OMS, and WMS.",
+  keywords: ["Software Engineering", "Distributed Systems", "Architecture", "Spring Boot", "Kafka", "Cloud", "System Design"],
+  authors: [{ name: "Tirtha" }],
+  creator: "Tirtha",
   metadataBase: new URL("https://tirthachetry.dpdns.org"),
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://tirthachetry.dpdns.org",
-    title: "Tirtha Chetry | AI Engineer & Software Developer",
-    description: "Personal website of Tirtha Chetry featuring AI projects, software engineering articles, open-source contributions, system design insights, automation experiments, and technology research.",
-    siteName: "Tirtha Chetry",
+    title: "Engineering Blogs by Tirtha",
+    description: "Engineering insights, architecture patterns, and practical lessons from building scalable distributed systems across FinTech, OMS, and WMS.",
+    siteName: "Engineering Blogs by Tirtha",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tirtha Chetry | AI Engineer & Software Developer",
-    description: "Personal website of Tirtha Chetry featuring AI projects, software engineering articles, open-source contributions, system design insights, automation experiments, and technology research.",
+    title: "Engineering Blogs by Tirtha",
+    description: "Engineering insights, architecture patterns, and practical lessons from building scalable distributed systems across FinTech, OMS, and WMS.",
     creator: "@tirthachetry",
   },
   robots: {

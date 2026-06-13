@@ -13,7 +13,6 @@ const navItems = [
   { name: "AI Lab", href: "/#ai-lab" },
   { name: "Open Source", href: "/#open-source" },
   { name: "Contact", href: "/#contact" },
-  { name: "Admin", href: "/admin", protected: true },
 ];
 
 export function Navigation() {
@@ -40,8 +39,8 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="font-bold text-xl">
-            <span className="text-primary">Tirtha</span>
-            <span className="text-secondary">Chetry</span>
+            <span className="text-primary">Engineering</span>
+            <span className="text-secondary">Blogs</span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
@@ -55,14 +54,6 @@ export function Navigation() {
               </Link>
             ))}
             <div className="flex items-center space-x-4 ml-4">
-              <a
-                href="https://github.com/tirthachetry-zoho"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors"
-              >
-                <GitBranch className="w-5 h-5" />
-              </a>
               <a
                 href="https://linkedin.com/in/tirthachetry"
                 target="_blank"
@@ -80,7 +71,7 @@ export function Navigation() {
                 <Twitter className="w-5 h-5" />
               </a>
               <a
-                href="mailto:tirtha@example.com"
+                href="mailto:tirthachetri12@gmail.com"
                 className="hover:text-primary transition-colors"
               >
                 <Mail className="w-5 h-5" />

@@ -137,23 +137,6 @@ export function Contact() {
 
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-primary/10 rounded-lg">
-                  <GitBranch className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">GitHub</h4>
-                  <a
-                    href="https://github.com/tirthachetry-zoho"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    github.com/tirthachetry-zoho
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
                   <Twitter className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -173,15 +156,6 @@ export function Contact() {
             <div className="pt-8 border-t">
               <h4 className="font-medium mb-4">Follow Me</h4>
               <div className="flex gap-4">
-                <a
-                  href="https://github.com/tirthachetry-zoho"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-background border rounded-lg hover:border-primary/50 hover:text-primary transition-all duration-300"
-                  aria-label="GitHub"
-                >
-                  <GitBranch className="w-5 h-5" />
-                </a>
                 <a
                   href="https://linkedin.com/in/tirthachetry"
                   target="_blank"
