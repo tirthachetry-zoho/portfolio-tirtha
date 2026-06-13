@@ -68,7 +68,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   }
 
   return (
-    <div className="min-h-screen py-24">
+    <div className="min-h-screen py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <ArticleContent
           title={post.title}
@@ -78,8 +78,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           readingTime={post.readingTime}
           tags={post.tags}
         >
-          <MDXRemote 
-            source={post.content} 
+          <MDXRemote
+            source={post.content}
             components={{
               Mermaid: ({ chart }: { chart: string }) => <Mermaid chart={chart} />,
             }}
