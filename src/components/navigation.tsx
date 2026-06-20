@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, GitBranch, Link as LinkIcon, Mail, X as Twitter, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TimeDisplay } from "@/components/time-display";
 
 const navItems = [
   { name: "About", href: "/about" },
@@ -72,6 +73,7 @@ export function Navigation() {
               </motion.div>
             ))}
             <div className="flex items-center space-x-2 ml-6 pl-6 border-l border-primary/20">
+              <TimeDisplay />
               <motion.a
                 href="https://linkedin.com/in/tirthachetry"
                 target="_blank"
