@@ -1,24 +1,40 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronDown, GitBranch, Link as LinkIcon, Mail, Sparkles, Code, Cpu, Database, Cloud } from "lucide-react";
+import { ArrowRight, ChevronDown, GitBranch, Link as LinkIcon, Mail, Sparkles, Code, Cpu, Database, Cloud, Terminal, Braces } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 const techIcons = [
-  { icon: Code, color: "text-blue-500" },
-  { icon: Cpu, color: "text-purple-500" },
-  { icon: Database, color: "text-green-500" },
-  { icon: Cloud, color: "text-cyan-500" },
+  { icon: Code, color: "text-blue-400" },
+  { icon: Cpu, color: "text-purple-400" },
+  { icon: Database, color: "text-green-400" },
+  { icon: Cloud, color: "text-cyan-400" },
+  { icon: Terminal, color: "text-pink-400" },
+  { icon: Braces, color: "text-orange-400" },
 ];
 
 export function Hero() {
   const yearsOfExperience = useMemo(() => {
-    const startDate = new Date("2019-06-01"); // Start date for career
+    const startDate = new Date("2019-06-01");
     const currentDate = new Date();
     const years = currentDate.getFullYear() - startDate.getFullYear();
     const months = currentDate.getMonth() - startDate.getMonth();
     return months < 0 ? years - 1 : years;
+  }, []);
+
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth) * 100,
+        y: (e.clientY / window.innerHeight) * 100,
+      });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -30,32 +46,81 @@ export function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated background */}
+      {/* Premium animated background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-card">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
+        
+        {/* Dynamic gradient orbs */}
+        <motion.div
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -100, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]"
+        />
+        <motion.div
+          animate={{
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px]"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-secondary/5 rounded-full blur-[150px]"
+        />
       </div>
+
+      {/* Mouse-following spotlight effect */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(600px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(59, 130, 246, 0.05), transparent 40%)`,
+        }}
+      />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-6"
+            transition={{ duration: 0.6 }}
+            className="mb-8"
           >
-            <span className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <Sparkles className="w-4 h-4 mr-2" />
-              AI Engineer & Software Developer
-            </span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+              </motion.div>
+              <span className="text-sm font-medium text-primary">AI Engineer & Software Developer</span>
+            </div>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-primary"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl sm:text-6xl lg:text-8xl font-bold mb-8 gradient-text animate-gradient"
           >
             Engineering Blogs
           </motion.h1>
@@ -63,125 +128,146 @@ export function Hero() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl sm:text-2xl text-muted-foreground mb-4 max-w-3xl mx-auto"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-xl sm:text-2xl text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed"
           >
-            Senior Software Engineer with {yearsOfExperience} years of experience building scalable distributed systems across FinTech, Order Management Systems (OMS), and Warehouse Management Systems (WMS).
+            Senior Software Engineer with <span className="text-primary font-semibold">{yearsOfExperience}+ years</span> of experience building scalable distributed systems across FinTech, OMS, and WMS.
           </motion.p>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-lg text-muted-foreground mb-4 max-w-2xl mx-auto"
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto leading-relaxed"
           >
-            I work primarily with Java, Spring Boot, Quarkus, AWS, and cloud-native architectures. Recently, I've been exploring Generative AI, RAG pipelines, and Spring AI to build intelligent applications.
+            Specializing in Java, Spring Boot, Quarkus, AWS, and cloud-native architectures. Exploring Generative AI, RAG pipelines, and Spring AI for intelligent applications.
           </motion.p>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-lg text-muted-foreground mb-16 max-w-2xl mx-auto leading-relaxed"
           >
-            Through this profile, I share engineering insights, architecture patterns, practical lessons, and hands-on experiences from real-world systems.
+            Sharing engineering insights, architecture patterns, practical lessons, and hands-on experiences from real-world systems.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
           >
-            <button
+            <motion.button
               onClick={() => scrollToSection("articles")}
-              className="group relative px-8 py-4 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="group relative px-8 py-4 bg-primary text-primary-foreground rounded-full font-medium overflow-hidden transition-all duration-300 glow"
             >
-              <span className="flex items-center">
+              <span className="relative z-10 flex items-center">
                 View Articles
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </span>
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={() => scrollToSection("projects")}
-              className="px-8 py-4 border border-primary/50 text-primary rounded-full font-medium hover:bg-primary/10 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 glass border border-primary/30 text-primary rounded-full font-medium hover:border-primary/50 transition-all duration-300"
             >
               Explore Projects
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={() => scrollToSection("contact")}
-              className="px-8 py-4 bg-secondary text-secondary-foreground rounded-full font-medium hover:bg-secondary/90 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 bg-gradient-to-r from-secondary to-primary text-white rounded-full font-medium hover:opacity-90 transition-all duration-300"
             >
               Contact Me
-            </button>
+            </motion.button>
           </motion.div>
 
-          {/* Floating tech icons */}
+          {/* Enhanced floating tech icons */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="flex items-center justify-center gap-8 mb-16"
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex items-center justify-center gap-8 mb-20"
           >
             {techIcons.map((tech, index) => (
               <motion.div
                 key={index}
-                initial={{ y: 0 }}
-                animate={{ y: [-10, 10, -10] }}
-                transition={{ duration: 3, delay: index * 0.2, repeat: Infinity }}
-                className={tech.color}
+                initial={{ y: 0, opacity: 0 }}
+                animate={{ 
+                  y: [-15, 15, -15],
+                  opacity: 1,
+                }}
+                transition={{ 
+                  duration: 4, 
+                  delay: index * 0.15, 
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className={`p-3 rounded-xl glass border border-primary/20 ${tech.color} hover:scale-110 transition-transform cursor-pointer`}
               >
                 <tech.icon className="w-8 h-8" />
               </motion.div>
             ))}
           </motion.div>
 
-          {/* Social links */}
+          {/* Premium social links */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
             className="flex items-center justify-center gap-6"
           >
-            <a
+            <motion.a
               href="https://github.com/tirthachetry-zoho"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-full bg-card border hover:border-primary/50 transition-all duration-300 hover:scale-110"
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-4 rounded-2xl glass border border-primary/20 hover:border-primary/50 transition-all duration-300"
             >
               <GitBranch className="w-6 h-6" />
-            </a>
-            <a
+            </motion.a>
+            <motion.a
               href="https://linkedin.com/in/tirthachetry"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-full bg-card border hover:border-primary/50 transition-all duration-300 hover:scale-110"
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-4 rounded-2xl glass border border-primary/20 hover:border-primary/50 transition-all duration-300"
             >
               <LinkIcon className="w-6 h-6" />
-            </a>
-            <a
-              href="mailto:tirtha@example.com"
-              className="p-3 rounded-full bg-card border hover:border-primary/50 transition-all duration-300 hover:scale-110"
+            </motion.a>
+            <motion.a
+              href="mailto:tirthachetri12@gmail.com"
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-4 rounded-2xl glass border border-primary/20 hover:border-primary/50 transition-all duration-300"
             >
               <Mail className="w-6 h-6" />
-            </a>
+            </motion.a>
           </motion.div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* Enhanced scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        transition={{ duration: 0.6, delay: 1 }}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2"
       >
         <motion.div
-          animate={{ y: [0, 10, 0] }}
+          animate={{ y: [0, 12, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="text-muted-foreground"
+          className="flex flex-col items-center gap-2"
         >
-          <ChevronDown className="w-6 h-6" />
+          <span className="text-xs text-muted-foreground uppercase tracking-widest">Scroll</span>
+          <ChevronDown className="w-6 h-6 text-primary" />
         </motion.div>
       </motion.div>
     </section>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GitBranch, Star, GitFork, GitCommit, Users, TrendingUp, ExternalLink } from "lucide-react";
+import { GitBranch, Star, GitFork, GitCommit, Users, TrendingUp, ExternalLink, Sparkles } from "lucide-react";
 
 const repositories = [
   {
@@ -55,28 +55,37 @@ const languages = [
 
 export function OpenSource() {
   return (
-    <section id="open-source" className="py-24 bg-card/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="open-source" className="py-24 relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">Open Source</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-6">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">Community</span>
+          </div>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 gradient-text">Open Source</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Contributing to the open source community and building tools that developers love.
           </p>
         </motion.div>
 
-        {/* Stats Grid */}
+        {/* Enhanced Stats Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
+          transition={{ duration: 0.6 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
         >
           {stats.map((stat, index) => (
             <motion.div
@@ -85,25 +94,32 @@ export function OpenSource() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-background border rounded-xl p-6 text-center hover:border-primary/50 transition-all duration-300"
+              whileHover={{ y: -5 }}
+              className="group"
             >
-              <stat.icon className="w-8 h-8 text-primary mx-auto mb-3" />
-              <div className="text-2xl font-bold mb-1">{stat.value}</div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
+              <div className="gradient-border h-full">
+                <div className="glass border border-primary/20 rounded-2xl p-6 text-center hover:border-primary/50 transition-all duration-300">
+                  <div className="p-3 bg-primary/10 rounded-xl w-fit mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                    <stat.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="text-3xl font-bold mb-2 gradient-text">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </div>
+              </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Featured Repositories */}
+        {/* Enhanced Featured Repositories */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-16"
+          transition={{ duration: 0.6 }}
+          className="mb-20"
         >
-          <h3 className="text-2xl font-bold mb-8 text-center">Featured Repositories</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <h3 className="text-2xl font-bold mb-10 text-center">Featured Repositories</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {repositories.map((repo, index) => (
               <motion.div
                 key={repo.name}
@@ -111,62 +127,70 @@ export function OpenSource() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="bg-background border rounded-xl p-6 hover:border-primary/50 transition-all duration-300 group"
+                whileHover={{ y: -8 }}
+                className="group"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <GitBranch className="w-6 h-6 text-primary" />
-                    <h4 className="font-semibold group-hover:text-primary transition-colors">{repo.name}</h4>
+                <div className="gradient-border h-full">
+                  <div className="glass border border-primary/20 rounded-2xl p-6 hover:border-primary/50 transition-all duration-300">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <GitBranch className="w-5 h-5 text-primary" />
+                        </div>
+                        <h4 className="font-bold group-hover:text-primary transition-colors">{repo.name}</h4>
+                      </div>
+                      <span className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-medium">{repo.language}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-6 line-clamp-2 leading-relaxed">{repo.description}</p>
+                    <div className="flex items-center gap-6 text-xs text-muted-foreground mb-6 pb-6 border-b border-primary/10">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4" />
+                        <span className="font-medium">{repo.stars}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <GitFork className="w-4 h-4" />
+                        <span className="font-medium">{repo.forks}</span>
+                      </div>
+                    </div>
+                    <motion.a
+                      href={repo.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.02 }}
+                      className="inline-flex items-center text-primary hover:underline text-sm font-medium"
+                    >
+                      View Repository <ExternalLink className="w-4 h-4 ml-2" />
+                    </motion.a>
                   </div>
-                  <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs">{repo.language}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{repo.description}</p>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3" />
-                    {repo.stars}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <GitFork className="w-3 h-3" />
-                    {repo.forks}
-                  </div>
-                </div>
-                <a
-                  href={repo.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-primary hover:underline text-sm"
-                >
-                  View Repository <ExternalLink className="w-3 h-3 ml-2" />
-                </a>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Language Stats */}
+        {/* Enhanced Language Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
+          className="mb-16"
         >
-          <h3 className="text-2xl font-bold mb-8 text-center">Languages</h3>
-          <div className="max-w-2xl mx-auto bg-background border rounded-xl p-6">
-            <div className="space-y-4">
-              {languages.map((lang) => (
+          <h3 className="text-2xl font-bold mb-10 text-center">Languages</h3>
+          <div className="max-w-2xl mx-auto glass border border-primary/20 rounded-2xl p-8">
+            <div className="space-y-6">
+              {languages.map((lang, index) => (
                 <div key={lang.name}>
-                  <div className="flex justify-between text-sm mb-2">
+                  <div className="flex justify-between text-sm mb-3">
                     <span className="font-medium">{lang.name}</span>
                     <span className="text-muted-foreground">{lang.percentage}%</span>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-3 bg-muted rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${lang.percentage}%` }}
                       viewport={{ once: true }}
-                      transition={{ duration: 1, delay: 0.2 }}
+                      transition={{ duration: 1.2, delay: index * 0.1 }}
                       className={`h-full ${lang.color} rounded-full`}
                     />
                   </div>
@@ -176,23 +200,25 @@ export function OpenSource() {
           </div>
         </motion.div>
 
-        {/* GitHub Profile Link */}
+        {/* Enhanced GitHub Profile Link */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mt-12"
+          transition={{ duration: 0.6 }}
+          className="text-center"
         >
-          <a
+          <motion.a
             href="https://github.com/tirthachetry-zoho"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-all duration-300"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-full font-medium hover:opacity-90 transition-all duration-300 glow"
           >
             <GitBranch className="w-5 h-5 mr-2" />
             View GitHub Profile
-          </a>
+          </motion.a>
         </motion.div>
       </div>
     </section>

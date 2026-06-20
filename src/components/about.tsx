@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Database, Cloud, Code2, Server, GitBranch, Zap, GraduationCap, Briefcase, Award, Rocket, MessageSquare, Users } from "lucide-react";
+import { Database, Cloud, Code2, Server, GitBranch, Zap, GraduationCap, Briefcase, Award, Rocket, MessageSquare, Users, Sparkles } from "lucide-react";
 
 const interests = [
   { icon: Server, title: "Backend Systems", description: "Building scalable backend systems with Java, Spring Boot, and Microservices Architecture" },
@@ -24,28 +24,37 @@ const timeline = [
 
 export function About() {
   return (
-    <section id="about" className="py-24 bg-card/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="about" className="py-24 relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-20"
         >
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">About Me</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-6">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">About</span>
+          </div>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 gradient-text">About Me</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Software Engineer specializing in building scalable backend systems with Java, Spring Boot, and Microservices Architecture. Passionate about creating efficient solutions and mentoring developers.
           </p>
         </motion.div>
 
-        {/* Core Interests */}
+        {/* Enhanced Core Interests */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-20"
+          transition={{ duration: 0.6 }}
+          className="mb-24"
         >
           <h3 className="text-2xl font-bold mb-8 text-center">Core Interests</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -55,48 +64,62 @@ export function About() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="p-6 bg-background border rounded-xl hover:border-primary/50 transition-all duration-300 cursor-pointer"
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                whileHover={{ scale: 1.05, y: -8 }}
+                className="group"
               >
-                <interest.icon className="w-8 h-8 text-primary mb-4" />
-                <h4 className="font-semibold mb-2">{interest.title}</h4>
-                <p className="text-sm text-muted-foreground">{interest.description}</p>
+                <div className="gradient-border h-full">
+                  <div className="glass border border-primary/20 rounded-2xl p-6 h-full hover:border-primary/50 transition-all duration-300">
+                    <div className="p-3 bg-primary/10 rounded-xl w-fit mb-4 group-hover:bg-primary/20 transition-colors">
+                      <interest.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h4 className="font-semibold mb-2 group-hover:text-primary transition-colors">{interest.title}</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{interest.description}</p>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Career Timeline */}
+        {/* Enhanced Career Timeline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
         >
-          <h3 className="text-2xl font-bold mb-8 text-center">Career Timeline</h3>
-          <div className="max-w-3xl mx-auto">
+          <h3 className="text-2xl font-bold mb-12 text-center">Career Timeline</h3>
+          <div className="max-w-4xl mx-auto">
             <div className="relative">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-secondary" />
+              {/* Enhanced timeline line */}
+              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-secondary to-primary" />
               <div className="space-y-8">
                 {timeline.map((item, index) => (
                   <motion.div
                     key={item.year}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="relative pl-12"
+                    className="relative pl-20"
                   >
-                    <div className="absolute left-2 top-0 w-4 h-4 bg-primary rounded-full border-4 border-background" />
-                    <div className="bg-background border rounded-xl p-6 hover:border-primary/50 transition-all duration-300">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-sm font-bold text-primary">{item.year}</span>
-                        <item.icon className="w-5 h-5 text-secondary" />
+                    <motion.div
+                      whileHover={{ scale: 1.2 }}
+                      className="absolute left-6 top-0 w-4 h-4 bg-primary rounded-full border-4 border-background shadow-lg shadow-primary/50"
+                    />
+                    <div className="gradient-border">
+                      <div className="glass border border-primary/20 rounded-2xl p-6 hover:border-primary/50 transition-all duration-300">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-bold">{item.year}</span>
+                          <div className="p-2 bg-secondary/10 rounded-lg">
+                            <item.icon className="w-4 h-4 text-secondary" />
+                          </div>
+                        </div>
+                        <h4 className="font-bold text-lg mb-1">{item.title}</h4>
+                        <p className="text-sm font-medium text-primary mb-2">{item.company}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
                       </div>
-                      <h4 className="font-semibold mb-1">{item.title}</h4>
-                      <p className="text-sm font-medium text-primary mb-1">{item.company}</p>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
                     </div>
                   </motion.div>
                 ))}
