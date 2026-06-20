@@ -2,6 +2,21 @@ import { Calendar, Clock, Tag, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Articles - Engineering Blogs by Tirtha",
+  description: "Technical articles on AI, software engineering, system design, and developer productivity.",
+  alternates: {
+    canonical: "https://tirthachetry.dpdns.org/articles",
+  },
+  openGraph: {
+    title: "Articles - Engineering Blogs by Tirtha",
+    description: "Technical articles on AI, software engineering, system design, and developer productivity.",
+    url: "https://tirthachetry.dpdns.org/articles",
+    type: "website",
+  },
+};
 
 async function getPosts() {
   const postsDir = join(process.cwd(), 'content/posts');

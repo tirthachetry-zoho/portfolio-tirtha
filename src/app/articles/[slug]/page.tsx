@@ -53,9 +53,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getPost(slug);
 
   if (!post) return {};
+  
+  const baseUrl = "https://tirthachetry.dpdns.org";
+  const url = `${baseUrl}/articles/${slug}`;
+
   return {
     title: post.title,
     description: post.description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      url: url,
+      type: "article",
+      publishedTime: post.date,
+      authors: ["Tirtha"],
+      tags: post.tags || [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+    },
   };
 }
 
@@ -67,25 +88,62 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
+  const baseUrl = "https://tirthachetry.dpdns.org";
+  const url = `${baseUrl}/articles/${slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.description,
+    "image": `${baseUrl}/og-image.jpg`,
+    "author": {
+      "@type": "Person",
+      "name": "Tirtha",
+      "url": baseUrl
+    },
+    "datePublished": post.date,
+    "dateModified": post.date,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": url
+    },
+    "keywords": post.tags ? post.tags.join(", ") : "",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Engineering Blogs by Tirtha",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${baseUrl}/icon.svg`
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ArticleContent
-          title={post.title}
-          description={post.description}
-          category={post.category}
-          date={post.date}
-          readingTime={post.readingTime}
-          tags={post.tags}
-        >
-          <MDXRemote
-            source={post.content}
-            components={{
-              Mermaid: ({ chart }: { chart: string }) => <Mermaid chart={chart} />,
-            }}
-          />
-        </ArticleContent>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="min-h-screen py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ArticleContent
+            title={post.title}
+            description={post.description}
+            category={post.category}
+            date={post.date}
+            readingTime={post.readingTime}
+            tags={post.tags}
+          >
+            <MDXRemote
+              source={post.content}
+              components={{
+                Mermaid: ({ chart }: { chart: string }) => <Mermaid chart={chart} />,
+              }}
+            />
+          </ArticleContent>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
