@@ -7,12 +7,12 @@ import { Menu, X, GitBranch, Link as LinkIcon, Mail, X as Twitter, Sparkles } fr
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { name: "About", href: "/#about" },
+  { name: "About", href: "/about" },
   { name: "Articles", href: "/articles" },
-  { name: "Projects", href: "/#projects" },
-  { name: "AI Lab", href: "/#ai-lab" },
-  { name: "Open Source", href: "/#open-source" },
-  { name: "Contact", href: "/#contact" },
+  { name: "Projects", href: "/projects" },
+  { name: "AI Lab", href: "/ai-lab" },
+  { name: "Open Source", href: "/open-source" },
+  { name: "Contact", href: "/contact" },
 ];
 
 export function Navigation() {
