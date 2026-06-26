@@ -161,6 +161,59 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
+## Configure IDE AI Extensions
+
+You can use the Cloudflare Tunnel endpoint with popular AI coding assistants:
+
+### Cline (VSCode Extension)
+
+1. Install the [Cline extension](https://marketplace.visualstudio.com/items?itemName=Cline.cline)
+2. Open Cline settings (Cmd/Ctrl + Shift + P → "Cline: Settings")
+3. Configure the API provider:
+
+```json
+{
+  "apiProvider": "openai",
+  "openAiBaseUrl": "https://YOUR-TUNNEL.trycloudflare.com/v1",
+  "openAiApiKey": "ollama",
+  "openAiModelId": "qwen3.6:27b"
+}
+```
+
+### OpenCode (IntelliJ Plugin)
+
+1. Install the [OpenCode plugin](https://plugins.jetbrains.com/plugin/23445-opencode)
+2. Go to Settings → Tools → OpenCode
+3. Configure the API settings:
+
+```
+API Provider: OpenAI Compatible
+Base URL: https://YOUR-TUNNEL.trycloudflare.com/v1
+API Key: ollama
+Model: qwen3.6:27b
+```
+
+### Continue.dev (VSCode Extension)
+
+1. Install the [Continue extension](https://marketplace.visualstudio.com/items?itemName=Continue.continue)
+2. Open Continue settings (Cmd/Ctrl + Shift + P → "Continue: Open Config")
+3. Add the Ollama provider:
+
+```json
+{
+  "models": [
+    {
+      "title": "Qwen3.6 27B (Kaggle)",
+      "provider": "ollama",
+      "model": "qwen3.6:27b",
+      "apiBase": "https://YOUR-TUNNEL.trycloudflare.com"
+    }
+  ]
+}
+```
+
+> **Tip**: Replace `YOUR-TUNNEL` with your actual Cloudflare tunnel URL from Step 4.
+
 ## Recommended Environment Variables
 
 | Variable | Value |
