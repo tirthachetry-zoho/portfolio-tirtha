@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import "highlight.js/styles/github-dark.css";
 
 const inter = Inter({
   variable: "--font-inter",

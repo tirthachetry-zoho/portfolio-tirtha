@@ -4,8 +4,10 @@ import Link from "next/link";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { MDXRemote } from 'next-mdx-remote/rsc';
+import rehypeHighlight from 'rehype-highlight';
 import ArticleContent from "./ArticleContent";
 import Mermaid from "@/components/Mermaid";
+import CodeBlock from "@/components/CodeBlock";
 
 async function getPost(slug: string) {
   const filePath = join(process.cwd(), 'content/posts', `${slug}.mdx`);
@@ -137,8 +139,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           >
             <MDXRemote
               source={post.content}
+              options={{
+                mdxOptions: {
+                  rehypePlugins: [rehypeHighlight],
+                },
+              }}
               components={{
                 Mermaid: ({ chart }: { chart: string }) => <Mermaid chart={chart} />,
+                pre: CodeBlock,
               }}
             />
           </ArticleContent>
