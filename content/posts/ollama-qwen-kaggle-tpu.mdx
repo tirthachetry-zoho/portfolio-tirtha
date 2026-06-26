@@ -1,0 +1,245 @@
+---
+title: "Running Ollama + Qwen3.6 (27B) on Kaggle with TPU"
+description: "A comprehensive guide to running Ollama inside a Kaggle Notebook and exposing it through a Cloudflare Tunnel, allowing you to use a large Qwen3.6 27B model even without powerful local hardware."
+date: "2025-01-15"
+tags: ["Ollama", "Qwen", "Kaggle", "TPU", "Cloudflare", "LLM"]
+category: "AI"
+readingTime: "10 min read"
+published: true
+---
+
+This guide shows how to run **Ollama** inside a **Kaggle Notebook** and expose it through a **Cloudflare Tunnel**, allowing you to use a large **Qwen3.6 27B** model even if you don't own powerful local hardware.
+
+> **Note**
+>
+> - Kaggle TPUs **cannot accelerate Ollama inference** because Ollama currently supports CPU and NVIDIA CUDA GPUs (not TPU execution).
+> - If you have access to **Kaggle T4 GPUs (recommended)**, Ollama will use them.
+> - If only TPU is available, Ollama will still run on the CPU. The TPU itself will remain unused.
+> - The instructions below work for Kaggle notebooks regardless of whether you have local hardware.
+
+## Step 1 — Create a Kaggle Notebook
+
+Recommended settings:
+
+- Internet: **Enabled**
+- Accelerator:
+  - ✅ T4 x2 (Recommended)
+  - ✅ T4 x1
+  - ⚠️ TPU (will not accelerate Ollama)
+  - ⚠️ CPU (very slow)
+
+## Step 2 — Install Dependencies
+
+```python
+import os
+
+# installing gpu detection tools
+os.system("apt-get install -y lshw pciutils zstd")
+
+# installing ollama
+os.system("curl -fsSL https://ollama.com/install.sh | sh")
+
+# checking gpu
+os.system("nvidia-smi")
+```
+
+## Step 3 — Configure and Start Ollama
+
+```python
+import os
+import time
+import subprocess
+import urllib.request
+
+# ── Environment ──────────────────────────────────────────
+os.environ["OLLAMA_HOST"] = "0.0.0.0:11434"
+
+os.environ["OLLAMA_MODELS"] = "/kaggle/working/ollama-data"
+
+os.environ["OLLAMA_KEEP_ALIVE"] = "-1"
+
+os.environ["OLLAMA_NUM_GPU"] = "2"
+
+# 262144 will OOM on T4×2 — use 8192 or 16384 safely
+os.environ["OLLAMA_CONTEXT_LENGTH"] = "131072"
+
+env = os.environ.copy()
+
+# ── Kill any existing Ollama process ─────────────────────
+subprocess.run(["pkill", "-f", "ollama", "serve"], env=env)
+time.sleep(2)
+
+# ── Start Ollama server ───────────────────────────────────
+print("Starting Ollama server...")
+
+ollama_process = subprocess.Popen(
+    ["ollama", "serve"],
+    env=env,
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL
+)
+
+# ── Wait until server is ready ────────────────────────────
+for i in range(30):
+    try:
+        urllib.request.urlopen("http://localhost:11434")
+        print("✓ Ollama is ready")
+        break
+    except:
+        print(f"Waiting... ({i+1}/30)")
+        time.sleep(2)
+else:
+    raise RuntimeError("Ollama server failed to start!")
+
+# ── Pull model ────────────────────────────────────────────
+model = "qwen3.6:27b"
+
+blob_dir = "/kaggle/working/ollama-data/blobs"
+
+if os.path.exists(blob_dir) and len(os.listdir(blob_dir)) > 0:
+    print("✓ Model files found, skipping download")
+else:
+    print(f"Downloading {model} (~17GB, this will take a while)...")
+
+    result = subprocess.run(
+        ["ollama", "pull", model],
+        env=env
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError("Model download failed!")
+
+print("✓ Model downloaded")
+
+print("\n✓ Model ready!")
+
+print("\nVerifying:")
+
+subprocess.run(["ollama", "list"], env=env)
+```
+
+## Step 4 — Expose Ollama via Cloudflare Tunnel
+
+```python
+!pip install pycloudflared -q
+
+from pycloudflared import try_cloudflare
+
+tunnel = try_cloudflare(port=11434)
+
+print(f"Tunnel URL: {tunnel.tunnel}/v1")
+```
+
+Example output:
+
+```
+https://example.trycloudflare.com/v1
+```
+
+You can now use this endpoint as your OpenAI-compatible base URL.
+
+## Example API Request
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://YOUR-TUNNEL.trycloudflare.com/v1",
+    api_key="ollama"
+)
+
+response = client.chat.completions.create(
+    model="qwen3.6:27b",
+    messages=[
+        {
+            "role": "user",
+            "content": "Explain quantum computing simply."
+        }
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Recommended Environment Variables
+
+| Variable | Value |
+|-----------|-------|
+| OLLAMA_HOST | 0.0.0.0:11434 |
+| OLLAMA_MODELS | /kaggle/working/ollama-data |
+| OLLAMA_KEEP_ALIVE | -1 |
+| OLLAMA_NUM_GPU | 2 (for dual T4) |
+| OLLAMA_CONTEXT_LENGTH | 131072 |
+
+## Performance Tips
+
+### T4 ×2
+
+- Excellent choice
+- Runs Qwen3.6 27B well
+- Context up to ~131K may work depending on available VRAM
+
+### T4 ×1
+
+Reduce:
+
+```python
+os.environ["OLLAMA_CONTEXT_LENGTH"] = "8192"
+```
+
+or
+
+```python
+os.environ["OLLAMA_CONTEXT_LENGTH"] = "16384"
+```
+
+to avoid out-of-memory errors.
+
+### TPU
+
+Current Ollama versions do **not** use TPUs for inference. If a TPU is selected in Kaggle, Ollama falls back to CPU execution, which is significantly slower. For the best experience, use an NVIDIA T4 GPU when available.
+
+## Persistence
+
+Model files are stored in:
+
+```
+/kaggle/working/ollama-data
+```
+
+They persist for the duration of the notebook session.
+
+## Troubleshooting
+
+### `nvidia-smi` not found
+
+No NVIDIA GPU is attached. Switch the notebook accelerator to **T4 GPU**.
+
+### `Model download failed` 
+
+- Verify Internet is enabled.
+- Ensure sufficient disk space.
+- Retry `ollama pull qwen3.6:27b`.
+
+### Cloudflare tunnel not working
+
+Restart the notebook kernel and create a new tunnel:
+
+```python
+from pycloudflared import try_cloudflare
+
+tunnel = try_cloudflare(port=11434)
+print(tunnel.tunnel)
+```
+
+## Summary
+
+✅ Runs entirely in a Kaggle notebook.
+
+✅ No local GPU required.
+
+✅ Can be accessed remotely using a Cloudflare Tunnel.
+
+✅ Best performance is achieved with Kaggle NVIDIA T4 GPUs.
+
+⚠️ Kaggle TPUs are currently **not supported** by Ollama for inference and will not accelerate Qwen3.6.
