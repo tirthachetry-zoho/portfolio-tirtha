@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Code2, Database, Cloud, Cpu, Server, GitBranch, Layout, Terminal, Shield, Zap } from "lucide-react";
+import Link from "next/link";
 
 const techCategories = [
   {
@@ -74,19 +75,24 @@ const techCategories = [
 
 export default function TechStackPage() {
   return (
-    <div className="min-h-screen py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-5xl sm:text-6xl font-bold mb-4">Tech Stack</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Technologies and tools I use to build scalable, intelligent applications.
-          </p>
-        </motion.div>
+    <div className="wrap py-16">
+      <Link
+        href="/"
+        className="mono text-[0.8rem] text-[var(--ink-soft)] border-b border-transparent pb-1 transition-colors hover:text-[var(--rust)] hover:border-[var(--rust)] inline-block mb-8"
+      >
+        ← Back to home
+      </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-16"
+      >
+        <h1 className="text-[1.6rem] font-bold mb-4">Tech Stack</h1>
+        <p className="text-[1.12rem] text-[var(--ink-soft)] max-w-[620px]">
+          Technologies and tools I use to build scalable, intelligent applications.
+        </p>
+      </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {techCategories.map((category, categoryIndex) => (
@@ -150,7 +156,6 @@ export default function TechStackPage() {
             <p className="text-sm text-muted-foreground">Years Experience</p>
           </div>
         </motion.div>
-      </div>
     </div>
   );
 }

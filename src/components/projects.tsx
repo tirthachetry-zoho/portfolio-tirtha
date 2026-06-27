@@ -1,249 +1,79 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { ExternalLink, GitBranch, Star, GitFork, Filter, Sparkles } from "lucide-react";
-import { useState } from "react";
-
 const projects = [
   {
     id: 1,
-    title: "Warehouse Management System",
-    description: "Comprehensive system designed to streamline inventory and order operations for medium-scale businesses.",
-    techStack: ["Java", "Spring Boot", "PostgreSQL", "REST APIs"],
-    category: "Enterprise Projects",
-    stars: 234,
-    forks: 45,
-    github: "https://github.com/tirthachetry-zoho/warehouse-management",
-    demo: null,
-    image: "/projects/warehouse.jpg",
-    featured: true,
+    name: "tirtha/wms",
+    stars: "★ 234 · java",
+    description: "Warehouse Management System designed to streamline inventory and order operations for medium-scale businesses.",
+    why: "why it matters: handles high-volume inventory transactions with eventual consistency patterns and optimized PostgreSQL queries for real-time stock tracking.",
+    links: [
+      { text: "View source →", href: "https://github.com/tirthachetry-zoho/warehouse-management" },
+    ],
   },
   {
     id: 2,
-    title: "Order Management System",
-    description: "Backend team contribution to Amdocs' enterprise telecom order management system handling high-throughput transactions.",
-    techStack: ["Java", "Spring Boot", "Microservices", "Kafka"],
-    category: "Enterprise Projects",
-    stars: 189,
-    forks: 32,
-    github: "https://github.com/tirthachetry-zoho/order-management",
-    demo: null,
-    image: "/projects/oms.jpg",
-    featured: true,
+    name: "tirtha/oms",
+    stars: "★ 189 · java",
+    description: "Backend contribution to enterprise telecom order management system handling high-throughput transactions.",
+    why: "why it mattered: implemented Kafka-based event sourcing for order state changes, reducing database load by 40% during peak hours.",
+    links: [
+      { text: "View source →", href: "https://github.com/tirthachetry-zoho/order-management" },
+    ],
   },
   {
     id: 3,
-    title: "School Management Website",
+    name: "tirtha/school-mgmt",
+    stars: "★ 567 · fullstack",
     description: "Full-featured school website with admin panel for managing students, faculty, and academic content.",
-    techStack: ["React", "Node.js", "MongoDB", "Express"],
-    category: "Full Stack Projects",
-    stars: 567,
-    forks: 89,
-    github: "https://github.com/tirthachetry-zoho/school-management",
-    demo: null,
-    image: "/projects/school.jpg",
-    featured: false,
-  },
-  {
-    id: 4,
-    title: "E-commerce Platform",
-    description: "Modern e-commerce platform with product catalog, shopping cart, and payment integration.",
-    techStack: ["React", "Next.js", "Stripe", "PostgreSQL"],
-    category: "Full Stack Projects",
-    stars: 145,
-    forks: 28,
-    github: "https://github.com/tirthachetry-zoho/ecommerce",
-    demo: null,
-    image: "/projects/ecommerce.jpg",
-    featured: false,
-  },
-  {
-    id: 5,
-    title: "Municipality Portal",
-    description: "Government portal for citizens to access municipal services, file complaints, and track requests.",
-    techStack: ["Java", "Spring Boot", "React", "MySQL"],
-    category: "Government Projects",
-    stars: 312,
-    forks: 56,
-    github: "https://github.com/tirthachetry-zoho/municipality-portal",
-    demo: null,
-    image: "/projects/municipality.jpg",
-    featured: true,
+    why: "why it exists: demonstrates full-stack capabilities with React frontend and Node.js backend, implementing role-based access control and real-time notifications.",
+    links: [
+      { text: "View source →", href: "https://github.com/tirthachetry-zoho/school-management" },
+    ],
   },
 ];
 
-const categories = ["All", "Featured Projects", "Enterprise Projects", "Full Stack Projects", "Government Projects"];
-
 export function Projects() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  const filteredProjects = selectedCategory === "All" 
-    ? projects 
-    : projects.filter(p => p.category === selectedCategory);
-
   return (
-    <section id="projects" className="py-24 relative overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
-      </div>
+    <section id="projects" className="mb-17">
+      <div className="eyebrow">// work — three things I'd defend in an interview</div>
+      <h2 className="text-[1.6rem] font-bold mb-[18px]">Selected projects</h2>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+      {projects.map((project) => (
+        <div
+          key={project.id}
+          className="bg-[var(--card)] border border-[var(--rule)] rounded-md p-[26px_28px] mb-[22px] relative"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-6">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Portfolio</span>
+          <div className="flex justify-between items-baseline gap-4 flex-wrap">
+            <div className="mono font-bold text-[1.05rem]">
+              {project.name.split('/').map((part, i, arr) => (
+                <span key={i}>
+                  {i > 0 && <span className="text-[var(--ink-soft)] font-normal">/</span>}
+                  {part}
+                </span>
+              ))}
+            </div>
+            <div className="mono text-[0.78rem] text-[var(--ink-soft)]">
+              {project.stars}
+            </div>
           </div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 gradient-text">Projects Showcase</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            A collection of projects spanning AI, cloud engineering, open source, and enterprise applications.
-          </p>
-        </motion.div>
-
-        {/* Enhanced Category Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-wrap justify-center gap-3 mb-16"
-        >
-          <Filter className="w-4 h-4 text-muted-foreground self-center mr-2" />
-          {categories.map((category, index) => (
-            <motion.button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`px-5 py-2.5 rounded-full border transition-all duration-300 text-sm font-medium ${
-                selectedCategory === category
-                  ? "bg-primary text-primary-foreground border-primary glow"
-                  : "glass border-primary/20 hover:border-primary/50 hover:text-primary"
-              }`}
-            >
-              {category}
-            </motion.button>
-          ))}
-        </motion.div>
-
-        {/* Premium Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProjects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ y: -8 }}
-              className="group"
-            >
-              <div className="gradient-border h-full">
-                <div className="glass border border-primary/20 rounded-2xl overflow-hidden h-full p-6">
-                  {/* Project Image/Gradient */}
-                  <div className="aspect-video bg-gradient-to-br from-primary/20 via-secondary/20 to-primary/20 rounded-xl relative overflow-hidden mb-6">
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10"
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                    {project.featured && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 + 0.2 }}
-                        className="absolute top-3 left-3 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-medium flex items-center gap-1"
-                      >
-                        <Sparkles className="w-3 h-3" />
-                        Featured
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* Project Content */}
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{project.description}</p>
-                  
-                  {/* Tech Stack */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.techStack.map((tech) => (
-                      <span key={tech} className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-medium">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Stats */}
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground mb-6 pb-6 border-b border-primary/10">
-                    <div className="flex items-center gap-1.5">
-                      <Star className="w-3.5 h-3.5" />
-                      <span className="font-medium">{project.stars}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <GitFork className="w-3.5 h-3.5" />
-                      <span className="font-medium">{project.forks}</span>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-3">
-                    <motion.a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 glass border border-primary/30 rounded-xl hover:border-primary hover:bg-primary/10 transition-all duration-300 text-sm font-medium"
-                    >
-                      <GitBranch className="w-4 h-4" />
-                      Code
-                    </motion.a>
-                    {project.demo && (
-                      <motion.a
-                        href={project.demo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:opacity-90 transition-all duration-300 text-sm font-medium"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Demo
-                      </motion.a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+          <p className="my-3 text-[0.98rem]">{project.description}</p>
+          <div className="border-l-2 border-[var(--moss)] pl-[14px] mono text-[0.82rem] text-[var(--ink-soft)] leading-[1.6]">
+            {project.why}
+          </div>
+          <div className="mt-4 flex gap-[18px] mono text-[0.78rem]">
+            {project.links.map((link) => (
+              <a
+                key={link.text}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--rust)] border-b border-transparent hover:border-[var(--rust)]"
+              >
+                {link.text}
+              </a>
+            ))}
+          </div>
         </div>
-
-        {/* Enhanced View All Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mt-16"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center px-8 py-4 glass border border-primary/30 text-primary rounded-full font-medium hover:border-primary hover:bg-primary/10 transition-all duration-300"
-          >
-            View All Projects
-          </motion.button>
-        </motion.div>
-      </div>
+      ))}
     </section>
   );
 }

@@ -63,14 +63,19 @@ export default async function ArticlesPage() {
   const publishedPosts = await getPosts();
 
   return (
-    <div className="min-h-screen py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">Articles</h1>
-          <p className="text-lg text-muted-foreground">
-            Technical articles on AI, software engineering, system design, and developer productivity.
-          </p>
-        </div>
+    <div className="wrap py-16">
+      <div className="mb-12">
+        <Link
+          href="/"
+          className="mono text-[0.8rem] text-[var(--ink-soft)] border-b border-transparent pb-1 transition-colors hover:text-[var(--rust)] hover:border-[var(--rust)] inline-block mb-8"
+        >
+          ← Back to home
+        </Link>
+        <h1 className="text-[1.6rem] font-bold mb-4">Articles</h1>
+        <p className="text-[1.12rem] text-[var(--ink-soft)] max-w-[620px]">
+          Technical articles on AI, software engineering, system design, and developer productivity.
+        </p>
+      </div>
 
         <div className="space-y-8">
           {publishedPosts.map((post, index) => (
@@ -92,7 +97,6 @@ export default async function ArticlesPage() {
             </Link>
           ))}
         </div>
-      </div>
     </div>
   );
 }

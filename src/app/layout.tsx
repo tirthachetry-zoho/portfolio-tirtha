@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import "highlight.js/styles/github-dark.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-serif",
   subsets: ["latin"],
   display: "swap",
+  axes: ["opsz", "wght"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -84,7 +84,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${sourceSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>
         <script
@@ -93,7 +93,6 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans">
-        <Navigation />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>

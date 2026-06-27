@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Award, ExternalLink, Calendar, CheckCircle } from "lucide-react";
+import Link from "next/link";
 
 const certifications = [
   {
@@ -64,19 +65,24 @@ const categories = ["All", "AI & ML", "Cloud", "Development", "DevOps"];
 
 export default function CertificationsPage() {
   return (
-    <div className="min-h-screen py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-5xl sm:text-6xl font-bold mb-4">Certifications</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Professional certifications validating expertise in cloud, AI, and development technologies.
-          </p>
-        </motion.div>
+    <div className="wrap py-16">
+      <Link
+        href="/"
+        className="mono text-[0.8rem] text-[var(--ink-soft)] border-b border-transparent pb-1 transition-colors hover:text-[var(--rust)] hover:border-[var(--rust)] inline-block mb-8"
+      >
+        ← Back to home
+      </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-16"
+      >
+        <h1 className="text-[1.6rem] font-bold mb-4">Certifications</h1>
+        <p className="text-[1.12rem] text-[var(--ink-soft)] max-w-[620px]">
+          Professional certifications validating expertise in cloud, AI, and development technologies.
+        </p>
+      </motion.div>
 
         {/* Category Filter */}
         <motion.div
@@ -164,7 +170,6 @@ export default function CertificationsPage() {
             </div>
           </div>
         </motion.div>
-      </div>
     </div>
   );
 }

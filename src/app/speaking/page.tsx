@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Mic, Calendar, MapPin, Users, ExternalLink, Video, FileText } from "lucide-react";
+import Link from "next/link";
 
 const events = [
   {
@@ -70,19 +71,24 @@ const types = ["All", "Conference Talk", "Workshop", "Meetup Talk", "Webinar", "
 
 export default function SpeakingPage() {
   return (
-    <div className="min-h-screen py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-5xl sm:text-6xl font-bold mb-4">Speaking & Community</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Conference talks, workshops, and community events where I share knowledge and connect with developers.
-          </p>
-        </motion.div>
+    <div className="wrap py-16">
+      <Link
+        href="/"
+        className="mono text-[0.8rem] text-[var(--ink-soft)] border-b border-transparent pb-1 transition-colors hover:text-[var(--rust)] hover:border-[var(--rust)] inline-block mb-8"
+      >
+        ← Back to home
+      </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-16"
+      >
+        <h1 className="text-[1.6rem] font-bold mb-4">Speaking & Community</h1>
+        <p className="text-[1.12rem] text-[var(--ink-soft)] max-w-[620px]">
+          Conference talks, workshops, and community events where I share knowledge and connect with developers.
+        </p>
+      </motion.div>
 
         {/* Stats */}
         <motion.div
@@ -212,7 +218,6 @@ export default function SpeakingPage() {
             </a>
           </div>
         </motion.div>
-      </div>
     </div>
   );
 }

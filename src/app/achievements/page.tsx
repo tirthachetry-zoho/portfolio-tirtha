@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Trophy, Award, Star, BookOpen, GitBranch, Users, Target, Zap } from "lucide-react";
+import Link from "next/link";
 
 const achievements = [
   {
@@ -66,19 +67,24 @@ const categories = ["All", "Awards", "Certifications", "Open Source", "Publicati
 
 export default function AchievementsPage() {
   return (
-    <div className="min-h-screen py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-5xl sm:text-6xl font-bold mb-4">Achievements</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Recognition, certifications, and milestones throughout my career.
-          </p>
-        </motion.div>
+    <div className="wrap py-16">
+      <Link
+        href="/"
+        className="mono text-[0.8rem] text-[var(--ink-soft)] border-b border-transparent pb-1 transition-colors hover:text-[var(--rust)] hover:border-[var(--rust)] inline-block mb-8"
+      >
+        ← Back to home
+      </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-16"
+      >
+        <h1 className="text-[1.6rem] font-bold mb-4">Achievements</h1>
+        <p className="text-[1.12rem] text-[var(--ink-soft)] max-w-[620px]">
+          Recognition, certifications, and milestones throughout my career.
+        </p>
+      </motion.div>
 
         {/* Stats */}
         <motion.div
@@ -149,7 +155,6 @@ export default function AchievementsPage() {
             </motion.div>
           ))}
         </div>
-      </div>
     </div>
   );
 }
