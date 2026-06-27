@@ -8,7 +8,7 @@ const sourceSerif = Source_Serif_4({
   variable: "--font-serif",
   subsets: ["latin"],
   display: "swap",
-  axes: ["opsz", "wght"],
+  axes: ["opsz"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
