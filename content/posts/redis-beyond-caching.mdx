@@ -1,0 +1,273 @@
+---
+title: "Redis Beyond Caching: 10 Essential Use Cases"
+description: "A concise cheat sheet of 10 Redis use cases using Spring Data Redis (StringRedisTemplate) with practical examples and architecture diagrams."
+date: "2024-07-02"
+tags: ["Redis", "Spring Boot", "Distributed Systems", "Java", "Caching"]
+category: "Backend Development"
+readingTime: "8 min read"
+published: true
+---
+
+Redis is often pigeonholed as just a caching layer, but it's a versatile data structure server that can solve many distributed systems problems. Here are 10 practical use cases with Spring Data Redis.
+
+## 1. Distributed Rate Limiting
+
+**Scenario**: Limit "Forgot Password" to 3 tries/hour.
+
+<Mermaid chart="
+sequenceDiagram
+    participant User
+    participant API
+    participant Redis
+
+    User->>API: Request password reset
+    API->>Redis: SET rate:user123 1 NX EX 3600
+    Redis-->>API: OK (new key)
+    API->>Redis: INCR rate:user123
+    Redis-->>API: 1
+    API-->>User: Request allowed
+
+    Note over User,Redis: 2nd attempt
+    User->>API: Request password reset
+    API->>Redis: INCR rate:user123
+    Redis-->>API: 2
+    API-->>User: Request allowed
+
+    Note over User,Redis: 4th attempt
+    User->>API: Request password reset
+    API->>Redis: INCR rate:user123
+    Redis-->>API: 4
+    API-->>User: Rate limit exceeded
+" />
+
+```java
+String key = "rate:" + userId;
+redis.opsForValue().setIfAbsent(key, "1", Duration.ofHours(1));
+Long count = redis.opsForValue().increment(key);
+if (count > 3) throw new RateLimitException();
+```
+
+## 2. Distributed Locks
+
+**Scenario**: Prevent double-booking the last airline seat.
+
+<Mermaid chart="
+graph LR
+    A[App 1] -->|SET lock:seat:101 uuid NX EX 10| B[Redis]
+    C[App 2] -->|SET lock:seat:101 uuid NX EX 10| B
+    B -->|true| A
+    B -->|false| C
+    A -->|bookSeat| D[Database]
+    A -->|Lua DEL if value==uuid| B
+    C -->|retry| B
+" />
+
+```java
+String uuid = UUID.randomUUID().toString();
+Boolean locked = redis.opsForValue()
+    .setIfAbsent("lock:seat:" + id, uuid, Duration.ofSeconds(10));
+
+if (Boolean.TRUE.equals(locked)) {
+    try { 
+        bookSeat(); 
+    } finally { 
+        // Lua script to delete lock ONLY if value == uuid
+        String script = "if redis.call('get', KEYS[1]) == ARGV[1] then " +
+                       "return redis.call('del', KEYS[1]) else return 0 end";
+        redis.execute(new DefaultRedisScript<>(script, Long.class), 
+                     Collections.singletonList("lock:seat:" + id), uuid);
+    }
+}
+```
+
+## 3. Job Queues
+
+**Scenario**: Async PDF invoice generation.
+
+<Mermaid chart="
+graph TB
+    subgraph Producers
+        A[API Server 1]
+        B[API Server 2]
+    end
+    subgraph Redis
+        C[queue:invoices]
+    end
+    subgraph Consumers
+        D[Worker 1]
+        E[Worker 2]
+    end
+    A -->|RPUSH| C
+    B -->|RPUSH| C
+    C -->|BLPOP| D
+    C -->|BLPOP| E
+" />
+
+```java
+// Producer
+redis.opsForList().rightPush("queue:invoices", orderId);
+
+// Consumer (Blocking)
+String job = redis.opsForList()
+    .leftPop("queue:invoices", 30, TimeUnit.SECONDS);
+```
+
+## 4. Real-Time Leaderboards
+
+**Scenario**: Strava weekly step challenge rankings.
+
+<Mermaid chart="
+graph LR
+    A[User Activity] -->|ZINCRBY| B[Sorted Set]
+    B -->|ZREVRANGE 0-9| C[Top 10]
+    B -->|ZREVRANK| D[User Rank]
+" />
+
+```java
+redis.opsForZSet().incrementScore("lb:steps", userId, stepsAdded);
+Set<TypedTuple<String>> top10 = redis.opsForZSet()
+    .reverseRangeWithScores("lb:steps", 0, 9);
+Long rank = redis.opsForZSet().reverseRank("lb:steps", userId);
+```
+
+## 5. Session Storage
+
+**Scenario**: Share user sessions across multiple API pods.
+
+<Mermaid chart="
+graph TB
+    subgraph LoadBalancer
+        A[User]
+    end
+    subgraph Pods
+        B[Pod 1]
+        C[Pod 2]
+    end
+    subgraph Redis
+        D[sess:token123]
+    end
+    A --> B
+    A --> C
+    B <--> D
+    C <--> D
+" />
+
+```java
+redis.opsForValue().set("sess:" + tokenId, userJson, Duration.ofHours(8));
+String user = redis.opsForValue().get("sess:" + tokenId);
+```
+
+## 6. Pub/Sub Messaging
+
+**Scenario**: Uber "Driver is arriving" WebSocket push.
+
+<Mermaid chart="
+graph LR
+    A[Driver Service] -->|PUBLISH| B[channel:ride:123]
+    C[WebSocket Handler] -->|SUBSCRIBE| B
+    B -->|message| C
+    C --> D[User Browser]
+" />
+
+```java
+// Publisher
+redis.convertAndSend("channel:ride:" + riderId, "Driver arriving");
+
+// Subscriber (implements MessageListener)
+public void onMessage(Message msg, byte[] p) { 
+    pushToWebSocket(new String(msg.getBody())); 
+}
+```
+
+## 7. Feature Flags
+
+**Scenario**: Instantly disable crypto trading without deploying code.
+
+<Mermaid chart="
+graph LR
+    A[Admin Dashboard] -->|HSET flags crypto_trade false| B[Redis Hash]
+    C[API Request] -->|HGET flags crypto_trade| B
+    B -->|false| D[Return 503]
+    B -->|true| E[Execute Feature]
+" />
+
+```java
+// Admin Toggle
+redis.opsForHash().put("flags", "crypto_trade", String.valueOf(false));
+
+// API Check
+boolean isEnabled = Boolean.parseBoolean(
+    redis.opsForHash().get("flags", "crypto_trade").toString()
+);
+```
+
+## 8. Health Monitoring
+
+**Scenario**: PagerDuty alert if payment declines spike.
+
+<Mermaid chart="
+graph TB
+    A[Payment Decline] --> B[Calculate Bucket]
+    B -->|mon:declines:bucket123| C[INCR]
+    C --> D{Count == 50?}
+    D -->|Yes| E[Trigger Alert]
+    D -->|No| F[Continue]
+" />
+
+```java
+long bucket = System.currentTimeMillis() / 120_000; // 2-min bucket
+String key = "mon:declines:" + bucket;
+Long count = redis.opsForValue().increment(key);
+if (count == 1) redis.expire(key, Duration.ofMinutes(2));
+if (count == 50) triggerAlert();
+```
+
+## 9. Geospatial Search
+
+**Scenario**: DoorDash finding 5 nearest drivers.
+
+<Mermaid chart="
+graph TB
+    A[Driver Location] -->|GEOADD| B[geo:drivers]
+    C[Restaurant] -->|GEORADIUS 3km| B
+    B -->|5 nearest| D[API Response]
+" />
+
+```java
+redis.opsForGeo().add("geo:drivers", new Point(lon, lat), driverId);
+Circle circle = new Circle(
+    new Point(restLon, restLat), 
+    new Distance(3, Metrics.KILOMETERS)
+);
+GeoResults<GeoLocation<String>> nearest = redis.opsForGeo()
+    .radius("geo:drivers", circle, args.limit(5));
+```
+
+## 10. Event Sourcing (Streams)
+
+**Scenario**: Immutable banking transaction audit log.
+
+<Mermaid chart="
+graph LR
+    A[Transaction] -->|XADD| B[stream:ledger]
+    B -->|XRANGE| C[Audit Query]
+    B -->|XREADGROUP| D[Event Consumer]
+" />
+
+```java
+Map<String, String> event = Map.of("account", "123", "amount", "50.00");
+redis.opsForStream().add("stream:ledger", event); // Auto-generates ID
+
+List<MapRecord<String, Object, Object>> history = redis.opsForStream()
+    .range("stream:ledger", Range.unbounded());
+```
+
+## Key Takeaways
+
+- **Atomic operations**: Redis provides atomic primitives for distributed coordination
+- **Data structures**: Choose the right structure (String, Hash, List, Set, ZSet, Geo, Stream)
+- **TTL**: Always set expiration to prevent memory leaks
+- **Performance**: In-memory operations make Redis ideal for low-latency use cases
+- **Scalability**: Single Redis instance can be replaced with Redis Cluster for horizontal scaling
+
+Redis is more than a cache—it's a Swiss Army knife for distributed systems challenges.
