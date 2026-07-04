@@ -1,0 +1,189 @@
+---
+title: "HTTP Finally Gets a Method It's Needed for Decades: Meet QUERY"
+description: "RFC 10008 standardizes QUERY, the first new HTTP method since PATCH — a safe, idempotent, cacheable way to send a request body."
+date: "2026-07-04"
+tags: ["http", "api", "rest", "rfc", "backend"]
+category: "Backend Development"
+readingTime: "8 min read"
+published: true
+---
+
+For 16 years — since PATCH arrived in 2010 — the list of standard HTTP methods hasn't changed.
+
+That changed in June 2026, when the IETF published **RFC 10008**, standardizing a new method called **QUERY**.
+
+It fills a gap that's forced developers into awkward workarounds since the earliest days of REST API design.
+
+<br />
+
+## The problem QUERY solves
+
+Anyone who's built a search endpoint has hit this wall.
+
+You need to send a complex, structured query — filters, sorting, pagination, maybe a SQL-like expression or a GraphQL document — and neither of HTTP's existing tools fits cleanly.
+
+**GET** is safe, idempotent, and cacheable — exactly the semantics a read operation should have.
+
+But GET has no defined body semantics. Complex filters have to be crammed into the URL as a query string, which runs into practical length limits, awkward encoding for nested structures (arrays in particular have no single agreed-upon syntax), and the fact that URLs are far more likely to end up in server and proxy logs than request bodies — a real concern when the query itself contains sensitive data.
+
+**POST** can carry any body you want, but by definition it isn't safe or idempotent.
+
+Caches and intermediaries have to assume a POST might change state, so they won't cache the response, and clients can't safely retry a failed POST without risking duplicate side effects.
+
+Developers have patched around this for years by either overloading GET with a body — technically undefined behavior, since some proxies strip it, some servers ignore it, some reject it outright — or just accepting that their "read" endpoint is technically a POST and giving up caching and safe-retry guarantees.
+
+<br />
+
+## What QUERY actually is
+
+QUERY takes the body support from POST and the safe / idempotent / cacheable guarantees from GET.
+
+```http
+QUERY /products/search HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Accept: application/json
+
+{
+  "category": "books",
+  "price": { "lt": 30 },
+  "sort": ["-published", "title"],
+  "page": { "size": 20, "cursor": "eyJpZCI6NDJ9" }
+}
+```
+
+The server replies `200 OK` with the results in the body.
+
+Because the method is explicitly safe and idempotent, intermediaries can retry it automatically on failure and are allowed to cache the response — something never possible with POST.
+
+<br />
+
+### Key semantics from the RFC
+
+| Property | GET | QUERY | POST |
+|---|---|---|---|
+| Safe | Yes | Yes | Not guaranteed |
+| Idempotent | Yes | Yes | Not guaranteed |
+| Cacheable | Yes | Yes | Only for future GET/HEAD |
+| Has a body | No defined semantics | Expected | Expected |
+| URI represents the request | Yes, by definition | Optional | No |
+
+<br />
+
+A few implementation details worth knowing if you're building against this:
+
+- **Content-Type is mandatory.** A QUERY request without one is invalid and must fail with `400`.
+
+- If the media type isn't supported, the server should respond `415`, along with an `Accept-Query` header listing what it does support.
+
+- If the query is well-formed but can't be processed semantically — say, valid SQL referencing a table that doesn't exist — the right response is `422`.
+
+- `406` applies if the client's `Accept` header asks for a response format the server can't produce.
+
+- The RFC defines an **"equivalent resource"** concept — conceptually, the resource a GET would need to hit to represent the same query and its result. Servers can optionally expose this as a real URI via the `Location` header (for re-running the query later) or `Content-Location` (pointing to the specific, possibly one-off, result just returned).
+
+- A `303 See Other` response lets a server redirect to a stored query resource without inlining results at all — useful when a query is expensive to compute.
+
+- Caching works like GET's, except the cache key has to fold in the full request body and metadata, not just the URL.
+
+- Unlike POST, redirects to QUERY endpoints don't get silently downgraded the way old 301/302-after-POST redirects sometimes are in browsers.
+
+<br />
+
+### The Accept-Query header
+
+This is a new response header the RFC introduces alongside QUERY itself: a structured list of media types a given endpoint accepts for querying.
+
+```http
+Accept-Query: "application/x-www-form-urlencoded", application/sql
+```
+
+It's scoped to the resource path (ignoring any query string) and can be discovered via `HEAD`, `OPTIONS`, or from the `415` response of a rejected QUERY request.
+
+<br />
+
+### Naming history
+
+Early drafts of the spec used the name **SEARCH** instead.
+
+The working group settled on QUERY specifically to avoid inheriting the baggage of the existing WebDAV-era safe methods — `SEARCH`, `PROPFIND`, and `REPORT` (RFC 5323, RFC 3253, RFC 4918) — which are tied to WebDAV's specific resource/property model and generic XML formats.
+
+QUERY was chosen as a name because it maps cleanly onto the URI's query component and generalizes to any resource, not just WebDAV's namespace.
+
+<br />
+
+## Who's behind it
+
+RFC 10008 was authored by Julian Reschke (greenbytes, a longtime co-editor of the HTTP/1.1 specs), James M. Snell (Cloudflare), and Mike Bishop (Akamai), under the IETF's HTTPbis working group, with Gorry Fairhurst as responsible Area Director.
+
+It went through 14 draft revisions over roughly a decade of discussion before IESG approval in November 2025 and formal publication in June 2026.
+
+Two of the three authors working at major CDN providers (Cloudflare, Akamai) is a detail worth noting for adoption-watchers — it suggests edge-cache support could plausibly arrive ahead of framework-level support, though as of this writing neither company has announced QUERY support in their caching infrastructure.
+
+<br />
+
+## Where support stands today (as of July 2026)
+
+Adoption is early and uneven across the stack.
+
+**Node.js** has parsed QUERY as a method natively since early 2024 — ahead of standardization.
+
+**Go** supports it like any custom method via `http.NewRequest`.
+
+**.NET 10** has both client- and server-side support already.
+
+**Spring (Java)** does not yet route QUERY through `@RequestMapping` — the relevant pull request was still open as of early July 2026.
+
+**Browsers**: QUERY is not a CORS-safelisted method, so any cross-origin use requires a preflight `OPTIONS` round trip. No browser implements it as a first-class `fetch()` option yet, and there's no MDN page or caniuse entry.
+
+**CDNs**: most existing caching infrastructure doesn't recognize QUERY yet and will likely just pass it through uncached until cache-key logic is updated to understand it.
+
+**Tooling**: OpenAPI 3.2 added first-class documentation support for the method, and the API client tool Kreya added out-of-the-box QUERY support in its 1.20 release.
+
+**Frameworks generally**: most web frameworks require registering QUERY as a custom method string rather than treating it as a built-in verb — Python's Starlette is one documented example of this pattern.
+
+<br />
+
+## Practical guidance
+
+The consensus across current writeups is fairly consistent.
+
+**Don't rush to convert everything.** Plain GET with query parameters is still the right choice for simple filters, and critically, for anything users need to bookmark or share as a link — QUERY's body-based approach means the query itself can't be represented as a shareable URL.
+
+**QUERY's natural target is the endpoints where you've been abusing POST for reads** — search, reporting, analytics, and filter-heavy endpoints where GET's URL-based approach has already broken down.
+
+**Production use today makes the most sense server-to-server**, where you control both ends of the connection (e.g., .NET-to-.NET), since you get correct semantics and free retry safety without worrying about browser/CORS limitations.
+
+**For public, browser-facing APIs, keep a POST fallback** for the foreseeable future — advertise QUERY support via `Accept-Query` for clients that can use it, but don't assume broad client support yet.
+
+**GraphQL APIs are a natural fit for the future**: most currently use POST for reads purely because queries are too large for a URL; QUERY removes that justification while keeping the same body-based transport.
+
+<br />
+
+## References
+
+- [RFC 10008 — The HTTP QUERY Method](https://datatracker.ietf.org/doc/rfc10008/) — IETF Datatracker, the primary specification.
+
+- [HTTP QUERY Method: The Safe GET With a Body (RFC 10008) — Rabinarayan Patra](https://www.rabinarayanpatra.com/blogs/http-query-method-rfc-10008)
+
+- [HTTP QUERY: The Method That Finally Closes the Gap Between GET and POST — while true do;](https://www.danieleteti.it/post/http-query-method-en/)
+
+- [The New HTTP QUERY Method – and How to Use It Today with .NET 10 — vensas GmbH](https://vensas.de/en/blog/http-query-method-dotnet-10)
+
+- [HTTP QUERY Method (RFC 10008) Implemented in Python — DevelopersIO](https://dev.classmethod.jp/en/articles/http-query-method-rfc10008-python-demo/)
+
+- [RFC 10008: HTTP Finally Gets a QUERY Method — Jordan Rowles, Medium](https://jordansrowles.medium.com/rfc-10008-http-finally-gets-a-query-method-22441ae51ded)
+
+- [HTTP Finally Gets a Method It's Needed for Decades: Meet QUERY — Nowshad Jawad, Medium](https://medium.com/@anmjawad007/http-finally-gets-a-method-its-needed-for-decades-meet-query-bb1b77def9a3)
+
+- [The new HTTP method: QUERY — Tykok, DEV Community](https://dev.to/tykok/the-new-http-method-query-2bec)
+
+- [The new HTTP QUERY method explained — Kreya](https://kreya.app/blog/new-http-query-method-explained/)
+
+- [The New HTTP QUERY Method, Explained (2026) — Sesame Disk](https://sesamedisk.com/http-query-method-2026-guide/)
+
+<br />
+
+---
+
+*This post reflects the state of QUERY method adoption as of early July 2026. Given how early support still is across browsers, frameworks, and CDNs, expect this landscape to shift quickly — check the primary RFC and your framework's release notes before committing to it in production.*
