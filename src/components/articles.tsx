@@ -41,12 +41,25 @@ async function getPosts() {
 }
 
 export async function Articles() {
-  const articlesList = (await getPosts()).slice(0, 3);
+  const allPosts = await getPosts();
+  const articlesList = allPosts.slice(0, 3);
 
   return (
     <section id="articles" className="mb-17">
-      <div className="eyebrow">// writing</div>
-      <h2 className="text-[1.6rem] font-bold mb-[18px]">Notes from the job</h2>
+      <div className="flex justify-between items-end mb-[18px]">
+        <div>
+          <div className="eyebrow">// writing</div>
+          <h2 className="text-[1.6rem] font-bold">Notes from the job</h2>
+        </div>
+        {allPosts.length > 3 && (
+          <Link
+            href="/articles"
+            className="mono text-[0.8rem] text-[var(--ink-soft)] border-b border-transparent pb-1 transition-colors hover:text-[var(--rust)] hover:border-[var(--rust)] mb-1"
+          >
+            View all articles →
+          </Link>
+        )}
+      </div>
 
       {articlesList.map((article) => (
         <div

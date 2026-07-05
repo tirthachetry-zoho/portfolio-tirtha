@@ -30,7 +30,7 @@ export function Hero() {
           <h1 className="text-[2.6rem] font-bold tracking-[-0.01em] mb-1.5">Tirtha Chetry</h1>
           <div className="mono text-[0.85rem] text-[var(--moss)] tracking-[0.04em]">
             <span className="text-[var(--ink-soft)]">$ whoami → </span>
-            senior software engineer, distributed systems
+            Java Backend Developer, Distributed Systems
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
