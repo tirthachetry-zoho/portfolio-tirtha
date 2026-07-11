@@ -63,11 +63,11 @@ export default async function ArticlesPage() {
   const publishedPosts = await getPosts();
 
   return (
-    <div className="wrap py-16">
+    <div className="wrap subpage py-16">
       <div className="mb-12">
         <Link
           href="/"
-          className="mono text-[0.8rem] text-[var(--ink-soft)] border-b border-transparent pb-1 transition-colors hover:text-[var(--rust)] hover:border-[var(--rust)] inline-block mb-8"
+          className="mono text-[0.8rem] text-muted-foreground border-b border-transparent pb-1 transition-colors hover:text-primary hover:border-primary inline-block mb-8"
         >
           ← Back to home
         </Link>

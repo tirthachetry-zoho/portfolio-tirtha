@@ -29,5 +29,5 @@ export default function Mermaid({ chart }: MermaidProps) {
     }
   }, [chart]);
 
-  return <div ref={ref} className="flex justify-center my-8" />;
+  return <div ref={ref} className="mermaid-wrap flex justify-center my-8" />;
 }

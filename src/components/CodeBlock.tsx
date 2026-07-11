@@ -63,7 +63,7 @@ export default function CodeBlock({
             </span>
           </div>
         )}
-        <pre className={`!m-0 !p-4 !bg-transparent ${className}`} {...props}>
+        <pre className={`!m-0 !p-4 !bg-transparent overflow-x-auto ${className}`} {...props}>
           <code className="font-mono text-sm leading-relaxed">{children}</code>
         </pre>
       </div>

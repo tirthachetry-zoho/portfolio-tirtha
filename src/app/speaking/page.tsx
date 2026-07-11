@@ -71,10 +71,10 @@ const types = ["All", "Conference Talk", "Workshop", "Meetup Talk", "Webinar", "
 
 export default function SpeakingPage() {
   return (
-    <div className="wrap py-16">
+    <div className="wrap subpage py-16">
       <Link
         href="/"
-        className="mono text-[0.8rem] text-[var(--ink-soft)] border-b border-transparent pb-1 transition-colors hover:text-[var(--rust)] hover:border-[var(--rust)] inline-block mb-8"
+        className="mono text-[0.8rem] text-muted-foreground border-b border-transparent pb-1 transition-colors hover:text-primary hover:border-primary inline-block mb-8"
       >
         ← Back to home
       </Link>
@@ -211,7 +211,7 @@ export default function SpeakingPage() {
               I'm always open to speaking at conferences, meetups, and company events. Let's connect!
             </p>
             <a
-              href="#contact"
+              href="/#contact"
               className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-all duration-300"
             >
               Get in Touch

@@ -127,7 +127,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="min-h-screen py-16">
+      <div className="min-h-screen subpage py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ArticleContent
             title={post.title}

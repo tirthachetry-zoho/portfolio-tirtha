@@ -233,3 +233,37 @@
     padding: 0 20px;
   }
 }
+
+/* Sub-page top padding so content clears the fixed navbar (h-16 = 4rem) */
+.subpage {
+  padding-top: 6rem;
+}
+
+/* Prevent horizontal overflow on small screens from code/diagrams */
+.prose pre,
+.prose code,
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prose img,
+.prose svg,
+.prose table,
+.prose pre {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Mermaid diagrams should scale, not overflow */
+.mermaid-wrap svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Long unbreakable strings (URLs, code) wrap instead of overflowing */
+.break-words {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
