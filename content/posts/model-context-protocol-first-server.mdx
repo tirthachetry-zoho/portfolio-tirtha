@@ -1,0 +1,330 @@
+---
+title: "Model Context Protocol (MCP): Building Your First Server in Java"
+description: "A hands-on, enterprise-grade guide to MCP — the open standard that lets AI agents connect to tools, data, and prompts. Build a Spring Boot server in Java and explore real-world use cases."
+date: "2026-07-11"
+tags: ["MCP", "Agentic AI", "LLM", "Tool Calling", "Java", "Spring Boot"]
+category: "AI"
+readingTime: "13 min read"
+published: true
+---
+
+In my earlier post on [building agentic AI systems](/articles/building-agentic-ai-systems), we wired tools directly into CrewAI agents. That works — until you have ten agents, each needing access to the same database, the same Slack, the same internal API. Every integration becomes a one-off, and you end up re-implementing the same connector in every framework you touch.
+
+<span style={{ color: "#64ffda", fontWeight: 600 }}>Model Context Protocol (MCP)</span> is the fix. Announced by Anthropic in late 2024 and now backed by a growing open-source ecosystem (including first-class SDKs for Python, TypeScript, and Java), MCP is a standardized protocol for connecting AI models to the outside world. Think of it as the **USB-C port for AI applications**: one connector shape, any peripheral.
+
+This guide walks through what MCP actually is, the mental model behind it, and how to build a working, enterprise-grade server in **Java with Spring Boot** that an agent can call.
+
+<div style={{ borderLeft: "3px solid #64ffda", background: "rgba(100,255,218,0.07)", padding: "14px 18px", borderRadius: "8px", margin: "24px 0" }}>
+  <strong style={{ color: "#64ffda" }}>📌 What you'll build</strong>
+  <ul style={{ margin: "8px 0 0", paddingLeft: "20px", color: "#ccd6f6" }}>
+    <li>A minimal <code style={{ color: "#82aaff" }}>@Tool</code> server with Spring Boot</li>
+    <li>The same server exposing <span style={{ color: "#82aaff" }}>resources</span>, <span style={{ color: "#c792ea" }}>prompts</span>, and guarded DB tools</li>
+    <li>An HTTP/SSE deployment behind your gateway + 5 enterprise use cases</li>
+  </ul>
+</div>
+
+<br />
+
+## The problem MCP solves
+
+Before MCP, every agent framework had its own way of describing tools. If you wrote a "query the orders database" tool for CrewAI, you couldn't reuse it in LangChain without rewriting it. The integration logic lived *inside* the agent.
+
+<Mermaid chart="
+graph LR
+    A[Agent Framework A] -->|custom glue| DB[(Database)]
+    A -->|custom glue| SL[Slack]
+    B[Agent Framework B] -->|rewrite glue| DB
+    B -->|rewrite glue| SL
+    C[Agent Framework C] -->|rewrite glue| DB
+    C -->|rewrite glue| SL
+" />
+
+MCP inverts this. You build a **server** once that exposes your capability — a tool, a dataset, a prompt — and any MCP-compatible **client** (Claude Desktop, a custom agent, an IDE extension) can connect to it. The server owns the integration; the agent just speaks MCP.
+
+<Mermaid chart="
+graph LR
+    Client[Agent / Client] -->|MCP| S1[Orders Server]
+    Client -->|MCP| S2[Slack Server]
+    Client -->|MCP| S3[GitHub Server]
+    S1 --> DB[(Database)]
+    S2 --> SL[Slack API]
+    S3 --> GH[GitHub API]
+" />
+
+<br />
+
+## The mental model: Host, Client, Server
+
+MCP has three roles:
+
+- **Host** — the application the user runs (Claude Desktop, an IDE, your own agent process). It can run multiple clients.
+- **Client** — a connection inside the host to a single server. One client ↔ one server.
+- **Server** — a program that exposes capabilities over the protocol.
+
+And three kinds of capability, called **primitives**:
+
+| Primitive | What it is | Who drives it |
+|---|---|---|
+| <span style={{ color: "#64ffda", fontWeight: 600 }}>Tools</span> | Executable functions the model can call (e.g. `sendEmail`) | Model-initiated |
+| <span style={{ color: "#82aaff", fontWeight: 600 }}>Resources</span> | Read-only data the app can fetch (e.g. a file, a DB row) | App-initiated |
+| <span style={{ color: "#c792ea", fontWeight: 600 }}>Prompts</span> | Reusable prompt templates the user can invoke | User-initiated |
+
+<span style={{ color: "#8892b0" }}>Tools</span> are what most people mean when they talk about "giving an agent abilities." <span style={{ color: "#82aaff" }}>Resources</span> and <span style={{ color: "#c792ea" }}>prompts</span> are how you feed it context and standardize common workflows.
+
+<br />
+
+## Transports: how they talk
+
+MCP supports two standard transports:
+
+1. **stdio** — the server runs as a local subprocess, communication over stdin/stdout. Simplest, great for local tools and desktop apps.
+2. **Streamable HTTP (SSE)** — the server runs remotely and speaks MCP over HTTP (with Server-Sent Events for streaming). Use this for shared, hosted servers.
+
+<div style={{ borderLeft: "3px solid #ffd166", background: "rgba(255,209,102,0.07)", padding: "14px 18px", borderRadius: "8px", margin: "24px 0" }}>
+  <strong style={{ color: "#ffd166" }}>⚠️ Enterprise pick</strong>
+  <span style={{ color: "#ccd6f6" }}> For production you almost always want the <strong>HTTP transport</strong>: it lets you run the server as a managed Spring Boot service behind your existing gateway, auth, and observability stack. We'll build a Spring Boot server and show both transports.</span>
+</div>
+
+<br />
+
+## Building your first server (Java + Spring Boot)
+
+The official Java SDK is published under the `io.modelcontextprotocol` group. For Spring Boot apps, use the reactive or servlet starter:
+
+```xml
+<dependency>
+    <groupId>io.modelcontextprotocol</groupId>
+    <artifactId>mcp-spring-webflux</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+> Use `mcp-spring-webmvc` instead if you prefer a servlet (Tomcat/Jetty) stack over WebFlux.
+
+### A minimal server with one tool
+
+The Java SDK supports an annotation-based model that mirrors the Python decorator style. Define a Spring bean, annotate methods with `@Tool`, and the SDK auto-generates the JSON schema from your method signature and Javadoc.
+
+```java
+import io.modelcontextprotocol.server.annotation.Tool;
+import io.modelcontextprotocol.server.annotation.ToolParam;
+import org.springframework.stereotype.Service;
+
+@Service
+public class WeatherService {
+
+    @Tool(description = "Return the current weather for a given city")
+    public String getWeather(
+            @ToolParam(description = "The name of the city, e.g. \"London\"") String city) {
+        // In production you'd call a weather provider here.
+        return "It's 18°C and partly cloudy in " + city + ".";
+    }
+}
+```
+
+Register the tool beans with the MCP server. With the Spring integration this is a single provider bean:
+
+```java
+import io.modelcontextprotocol.server.annotation.MethodToolCallbackProvider;
+import io.modelcontextprotocol.server.ToolCallbackProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class McpServerConfig {
+
+    @Bean
+    public ToolCallbackProvider weatherTools(WeatherService weatherService) {
+        return MethodToolCallbackProvider.builder()
+                .toolObjects(weatherService)
+                .build();
+    }
+}
+```
+
+That's the whole server. The Javadoc becomes the tool's description that the model sees, and the `@ToolParam` annotations define the input schema — MCP generates the JSON schema for you. Run it as a normal Spring Boot app and it exposes the MCP endpoint.
+
+<br />
+
+### Adding resources and prompts
+
+A server gets more useful when it mixes all three primitives. Here's a service that exposes an incident log as a **resource**, an acknowledge action as a **tool**, and a reusable postmortem **prompt**:
+
+```java
+@Service
+public class IncidentService {
+
+    // --- Resource: read-only data the app can pull ---
+    @ResourceTemplate(uri = "incident://{incidentId}")
+    @Tool(description = "Fetch the raw log for a given incident id")
+    public String getIncident(@ToolParam String incidentId) {
+        // Imagine this reads from your incident store.
+        return "[incident " + incidentId + "] 14:02 outage start\n"
+             + "14:09 mitigated\n14:21 resolved";
+    }
+
+    // --- Tool: something the model can DO ---
+    @Tool(description = "Acknowledge an incident so on-call knows it's handled")
+    public String ackIncident(@ToolParam String incidentId) {
+        return "Incident " + incidentId + " acknowledged.";
+    }
+
+    // --- Prompt: a reusable template the user can invoke ---
+    @Prompt(description = "Build a prompt that asks the model to summarize an incident")
+    public Prompt getSummarizeIncidentPrompt(@ToolParam String incidentId) {
+        return new Prompt("Read the incident log for " + incidentId
+                + " via the incident resource, then write a 3-sentence "
+                + "postmortem summary for the status page.");
+    }
+}
+```
+
+The key distinction:
+
+- <span style={{ color: "#82aaff" }}>**resource**</span> — fetched by the host app to inject context
+- <span style={{ color: "#64ffda" }}>**tool**</span> — *called* by the model to take action
+- <span style={{ color: "#c792ea" }}>**prompt**</span> — a templated starting point the user picks from
+
+<br />
+
+### A realistic tool with side effects and guards
+
+Tools in production do real work — query a database, hit an API. Here's a tool that queries an orders database and returns structured rows, with input clamping and error handling. Note the `limit` is clamped *before* it reaches SQL, since the model (not you) supplies the argument at runtime.
+
+```java
+@Service
+public class OrderService {
+
+    private final JdbcTemplate jdbc;
+
+    public OrderService(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+    }
+
+    @Tool(description = "Return the most recent orders from the orders database")
+    public List<Map<String, Object>> getRecentOrders(
+            @ToolParam(description = "Maximum number of orders to return (1-100)") int limit) {
+
+        int safeLimit = Math.max(1, Math.min(100, limit)); // clamp to a safe range
+        try {
+            return jdbc.queryForList(
+                "SELECT id, customer, total, status FROM orders "
+              + "ORDER BY created_at DESC LIMIT ?",
+                safeLimit);
+        } catch (DataAccessException e) {
+            // Return an error object the model can explain, rather than crashing.
+            Map<String, Object> err = new HashMap<>();
+            err.put("error", "Database error: " + e.getMessage());
+            return List.of(err);
+        }
+    }
+}
+```
+
+<br />
+
+## Wiring the server into a client
+
+A server is useless without something to call it. The simplest test is the MCP Inspector, a browser-based debugger — point it at your running server's `/mcp` (or `/sse`) endpoint and you can list tools, call them with arguments, and inspect responses with no agent required.
+
+To connect from a real agent, the client just needs the server's URL (HTTP transport) or launch command (stdio). For a custom Java agent using the low-level client:
+
+```java
+var transport = new HttpClientSseClientTransport("http://localhost:8080");
+try (var client = McpClient.sync(transport).build()) {
+    client.initialize();
+    var tools = client.listTools().tools();
+    tools.forEach(t -> System.out.println(t.name()));
+    var result = client.callTool(new CallToolRequest("getWeather",
+            Map.of("city", "London")));
+    System.out.println(result);
+}
+```
+
+The agent never imports your weather library — it just speaks MCP. Swap the URL and the same client talks to your orders server, your Slack server, anything.
+
+<br />
+
+## Running over HTTP instead of stdio
+
+For an enterprise server, run it as a managed HTTP service. With the Spring Boot starter, the transport is configured in `application.properties` — no code change needed:
+
+```properties
+# Expose MCP over Server-Sent Events on the WebFlux stack
+spring.main.web-application-type=REACTIVE
+server.port=8080
+```
+
+The server now listens on its MCP endpoint (e.g. `/mcp` or `/sse` depending on SDK version) and can sit behind your API gateway, receive OAuth2/JWT from your IdP, and emit Micrometer metrics — exactly like any other Spring Boot service. This is the model you'd use to host a company-wide "tools server" that every internal agent reaches over the network.
+
+<br />
+
+## Enterprise use cases
+
+This is where MCP earns its keep. In a large organization, agents shouldn't each embed brittle connectors to CRM, billing, HR, and logging systems. MCP turns each of those into a governed, reusable server.
+
+### 1. Customer 360 for support copilots
+
+A support agent needs the full picture: the customer's plan (billing), open tickets (CRM), and recent shipments (ERP). Instead of the copilot hard-coding three integrations, each backend team ships an MCP server. The copilot discovers and calls them at runtime.
+
+<Mermaid chart="
+graph LR
+    Copilot[Support Copilot] -->|MCP| Billing[Billing Server]
+    Copilot -->|MCP| CRM[CRM Server]
+    Copilot -->|MCP| ERP[ERP Server]
+    Billing --> BDB[(Billing DB)]
+    CRM --> CDB[(CRM DB)]
+    ERP --> EDB[(ERP DB)]
+" />
+
+Each server enforces its own auth, field-level masking, and audit logging — the copilot stays simple and compliant.
+
+### 2. SRE / incident-response copilots
+
+Wire an MCP server in front of PagerDuty, your log store, and your runbook wiki. The on-call copilot can `ack_incident`, pull the raw log (resource), and draft a postmortem (prompt) — the exact primitives we built above — without anyone hand-rolling API clients at 3 a.m.
+
+### 3. Regulated document Q&A with audit trails
+
+In finance and healthcare, you can't let a model freely browse a document store. An MCP **resource** server fronts the document repository, enforces per-user entitlements, and records every fetch. The model only sees what the server permits, and every access is logged for compliance.
+
+### 4. Order orchestration across services
+
+The `getRecentOrders` tool above is the entry point to a larger pattern. In a fintech, an order agent calls the orders server, then the payments server (your [Outbox Pattern](/articles/distributed-transactions-outbox-pattern) ensures the payment event is published atomically), then the ledger server — each a separate MCP server, each independently deployable and observable.
+
+### 5. Multi-agent orchestration
+
+Because MCP is transport- and framework-agnostic, a coordinator agent built in LangChain can call tools served by a Java/Spring team and a Python team simultaneously. The protocol — not a shared language — is the contract. This is what makes MCP viable across an enterprise with heterogeneous stacks.
+
+<br />
+
+## Best practices
+
+1. <span style={{ color: "#64ffda", fontWeight: 600 }}>Write honest descriptions.</span> The model only knows what your tool does from the Javadoc/`@Tool` description and schema. Vague descriptions lead to wrong tool calls.
+2. <span style={{ color: "#64ffda", fontWeight: 600 }}>Validate and clamp inputs.</span> Model-supplied arguments are untrusted. Clamp ranges, validate enums, and fail gracefully — as we did with `safeLimit`.
+3. <span style={{ color: "#64ffda", fontWeight: 600 }}>Keep tools focused.</span> One tool should do one thing well. Prefer `getRecentOrders(limit)` over a giant `doEverything` tool.
+4. <span style={{ color: "#64ffda", fontWeight: 600 }}>Separate reads from writes.</span> Use **resources** for read-only context and **tools** for actions with side effects. This maps cleanly onto safe vs. unsafe operations.
+5. <span style={{ color: "#64ffda", fontWeight: 600 }}>Handle errors as data.</span> Return an error object the model can explain, rather than throwing out of the server — a dead server kills the whole agent session.
+6. <span style={{ color: "#ff6b6b", fontWeight: 600 }}>Secure remote servers.</span> An HTTP MCP server is an arbitrary code-execution surface. Put it behind your gateway, require JWT/OAuth2, and apply field-level authorization inside each tool.
+7. <span style={{ color: "#64ffda", fontWeight: 600 }}>Observe everything.</span> Emit Micrometer metrics and traces per tool call; an agent calling your server is just another distributed-system caller.
+8. <span style={{ color: "#64ffda", fontWeight: 600 }}>Version your server.</span> Like any API, capabilities change. Tag your server name/version so clients can adapt.
+
+<br />
+
+## Where this fits with agentic AI
+
+MCP doesn't replace frameworks like CrewAI or LangChain — it complements them. Those frameworks orchestrate *reasoning and collaboration*; MCP standardizes *how agents reach the world*. In the agentic-systems post we hand-wired tools into agents; with MCP, those same tools become reusable servers any agent can discover and call.
+
+If you're building more than one agent, or more than one tool, that standardization pays for itself quickly: build the connector once, use it everywhere — and in an enterprise, govern it like any other internal service.
+
+<br />
+
+## Conclusion
+
+MCP turns "my agent can call my database" from a bespoke integration into a standard, reusable contract. You build a server that owns the integration, expose tools/resources/prompts over a well-defined protocol, and any MCP-compatible client can connect — locally over stdio or, in production, as a managed Spring Boot service over HTTP.
+
+<div style={{ borderLeft: "3px solid #64ffda", background: "rgba(100,255,218,0.07)", padding: "14px 18px", borderRadius: "8px", margin: "24px 0" }}>
+  <strong style={{ color: "#64ffda" }}>🚀 Get started</strong>
+  <span style={{ color: "#ccd6f6" }}> Start with a single annotated <code style={{ color: "#82aaff" }}>@Tool</code> bean and the MCP Inspector to validate it, then wire it behind your gateway. As your toolset grows, the USB-C analogy holds: one protocol, every peripheral — and in Java shops, that protocol slots right into the Spring Boot services you already run.</span>
+</div>
+
+The ecosystem is young but moving fast — new servers appear weekly, and major agent hosts already speak the protocol. If you're investing in agentic systems in 2026, MCP is worth building on.
