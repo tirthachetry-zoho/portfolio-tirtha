@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TimeDisplay } from "@/components/time-display";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
+import { GithubIcon, LinkedinIcon, TopmateIcon } from "@/components/ui/brand-icons";
 
 const navItems = [
   { name: "About", href: "/#about" },
@@ -22,6 +22,7 @@ const socials = [
   { label: "GitHub", href: "https://github.com/tirthachetry-zoho", Icon: GithubIcon },
   { label: "LinkedIn", href: "https://linkedin.com/in/tirthachetry", Icon: LinkedinIcon },
   { label: "X", href: "https://x.com/tirthachetry", Icon: X },
+  { label: "Topmate", href: "https://topmate.io/tirtha_chetry", Icon: TopmateIcon },
 ];
 
 const RESUME_URL = "/resume";

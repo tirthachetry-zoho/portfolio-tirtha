@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Send, CheckCircle2, AlertCircle, X } from "lucide-react";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
+import { GithubIcon, LinkedinIcon, TopmateIcon } from "@/components/ui/brand-icons";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -13,6 +13,7 @@ const socials = [
   { label: "GitHub", href: "https://github.com/tirthachetry-zoho", Icon: GithubIcon },
   { label: "LinkedIn", href: "https://linkedin.com/in/tirthachetry", Icon: LinkedinIcon },
   { label: "X", href: "https://x.com/tirthachetry", Icon: X },
+  { label: "Topmate", href: "https://topmate.io/tirtha_chetry", Icon: TopmateIcon },
 ];
 
 export function Contact() {

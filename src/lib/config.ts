@@ -9,5 +9,6 @@ export const siteConfig = {
     github: "https://github.com/tirthachetry-zoho",
     linkedin: "https://linkedin.com/in/tirthachetry",
     twitter: "https://x.com/tirthachetry",
+    topmate: "https://topmate.io/tirtha_chetry",
   },
 };

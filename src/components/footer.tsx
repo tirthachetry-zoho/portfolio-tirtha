@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { X, ArrowUp } from "lucide-react";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
+import { GithubIcon, LinkedinIcon, TopmateIcon } from "@/components/ui/brand-icons";
 
 const year = new Date().getFullYear();
 
@@ -17,6 +17,7 @@ const socials = [
   { label: "GitHub", href: "https://github.com/tirthachetry-zoho", Icon: GithubIcon },
   { label: "LinkedIn", href: "https://linkedin.com/in/tirthachetry", Icon: LinkedinIcon },
   { label: "X", href: "https://x.com/tirthachetry", Icon: X },
+  { label: "Topmate", href: "https://topmate.io/tirtha_chetry", Icon: TopmateIcon },
 ];
 
 export function Footer() {

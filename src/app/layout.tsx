@@ -97,6 +97,7 @@ export default function RootLayout({
       "https://github.com/tirthachetry-zoho",
       "https://linkedin.com/in/tirthachetry",
       "https://x.com/tirthachetry",
+      "https://topmate.io/tirtha_chetry",
     ],
     description:
       "AI Engineer and Software Developer focused on distributed systems and agentic AI.",
