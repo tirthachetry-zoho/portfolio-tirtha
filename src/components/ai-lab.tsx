@@ -1,12 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Cpu, Zap, Brain, Terminal, Sparkles, ArrowRight, ExternalLink } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Cpu, Zap, Brain, Terminal, Sparkles, ArrowRight } from "lucide-react";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 const experiments = [
   {
     title: "Multi-Agent Collaboration System",
-    description: "Experimenting with autonomous AI agents that can collaborate on complex tasks using shared memory and communication protocols.",
+    description: "Autonomous AI agents that collaborate on complex tasks using shared memory and communication protocols.",
     status: "Active",
     tech: ["CrewAI", "LangChain", "OpenAI"],
     icon: Brain,
@@ -27,7 +28,7 @@ const experiments = [
   },
   {
     title: "AI Workflow Automation",
-    description: "Creating automated workflows that combine LLMs with traditional automation tools for end-to-end task execution.",
+    description: "Automated workflows that combine LLMs with traditional automation tools for end-to-end task execution.",
     status: "Research",
     tech: ["n8n", "LangChain", "Python"],
     icon: Terminal,
@@ -48,144 +49,93 @@ const experiments = [
   },
 ];
 
+const statusStyles: Record<string, string> = {
+  Active: "bg-primary/10 text-primary border-primary/30",
+  "In Progress": "bg-sky-500/10 text-sky-300 border-sky-500/30",
+  Research: "bg-violet-500/10 text-violet-300 border-violet-500/30",
+  Planning: "bg-amber-500/10 text-amber-300 border-amber-500/30",
+};
+
 export function AILab() {
+  const reduce = useReducedMotion();
+
   return (
-    <section id="ai-lab" className="py-24 relative overflow-hidden">
-      {/* Enhanced Futuristic Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-          className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px]"
-        />
+    <section id="ai-lab" className="scroll-mt-24 py-16">
+      <SectionHeading
+        eyebrow="// ai-lab"
+        title="AI Lab"
+        description="A space for AI experimentation, research, and cutting-edge technology exploration."
+      />
+
+      {/* Terminal-inspired status card */}
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="mb-10 rounded-xl border border-border bg-surface/60 p-6 font-mono text-sm"
+      >
+        <div className="mb-4 flex items-center gap-2">
+          <span className="h-3 w-3 rounded-full bg-red-500/80" />
+          <span className="h-3 w-3 rounded-full bg-amber-500/80" />
+          <span className="h-3 w-3 rounded-full bg-green-500/80" />
+          <span className="ml-3 text-muted-foreground">ai-lab-status</span>
+        </div>
+        <div className="space-y-2 text-muted-foreground">
+          <p><span className="text-primary">$</span> active_experiments: <span className="font-bold text-foreground">3</span></p>
+          <p><span className="text-primary">$</span> completed_projects: <span className="font-bold text-foreground">12</span></p>
+          <p><span className="text-primary">$</span> research_papers: <span className="font-bold text-foreground">5</span></p>
+          <p><span className="text-primary">$</span> ai_models_tested: <span className="font-bold text-foreground">8</span></p>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {experiments.map((experiment, index) => (
+          <motion.article
+            key={experiment.title}
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.06 }}
+            whileHover={reduce ? undefined : { y: -6 }}
+            className="group rounded-xl border border-border bg-surface/60 p-6 transition-colors hover:border-primary/50"
+          >
+            <div className="mb-5 flex items-start justify-between">
+              <div className="rounded-lg bg-primary/10 p-3 transition-colors group-hover:bg-primary/20">
+                <experiment.icon className="h-6 w-6 text-primary" />
+              </div>
+              <span
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                  statusStyles[experiment.status] ?? "border-border text-muted-foreground"
+                }`}
+              >
+                {experiment.status}
+              </span>
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+              {experiment.title}
+            </h3>
+            <p className="mb-5 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+              {experiment.description}
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {experiment.tech.map((tech) => (
+                <li key={tech} className="chip">
+                  {tech}
+                </li>
+              ))}
+            </ul>
+          </motion.article>
+        ))}
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+      <div className="mt-10 text-center">
+        <a
+          href="/ai-lab"
+          className="inline-flex items-center gap-2 rounded-md border border-primary/40 px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-6">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            >
-              <Sparkles className="w-4 h-4 text-primary" />
-            </motion.div>
-            <span className="text-sm font-medium text-primary">Experimental Zone</span>
-          </div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 gradient-text animate-gradient">AI Lab</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            A space for AI experimentation, research, and cutting-edge technology exploration.
-          </p>
-        </motion.div>
-
-        {/* Enhanced Terminal-inspired Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
-        >
-          <div className="glass border border-primary/30 rounded-2xl p-8 font-mono text-sm">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="ml-4 text-muted-foreground">ai-lab-status</span>
-            </div>
-            <div className="space-y-3 text-muted-foreground">
-              <p><span className="text-primary">$</span> active_experiments: <span className="text-secondary font-bold">3</span></p>
-              <p><span className="text-primary">$</span> completed_projects: <span className="text-secondary font-bold">12</span></p>
-              <p><span className="text-primary">$</span> research_papers: <span className="text-secondary font-bold">5</span></p>
-              <p><span className="text-primary">$</span> ai_models_tested: <span className="text-secondary font-bold">8</span></p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Enhanced Experiments Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {experiments.map((experiment, index) => (
-            <motion.div
-              key={experiment.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ y: -8 }}
-              className="group"
-            >
-              <div className="gradient-border h-full">
-                <div className="glass border border-primary/20 rounded-2xl p-6 h-full hover:border-primary/50 transition-all duration-300">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                      <experiment.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-                      experiment.status === "Active" ? "bg-green-500/10 text-green-400 border border-green-500/20" :
-                      experiment.status === "In Progress" ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
-                      experiment.status === "Research" ? "bg-purple-500/10 text-purple-400 border border-purple-500/20" :
-                      "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
-                    }`}>
-                      {experiment.status}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-lg mb-3 group-hover:text-primary transition-colors">{experiment.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-6 line-clamp-3 leading-relaxed">{experiment.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {experiment.tech.map((tech) => (
-                      <span key={tech} className="px-3 py-1 bg-secondary/10 text-secondary rounded-lg text-xs font-mono font-medium">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Enhanced CTA */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mt-16"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-full font-medium hover:opacity-90 transition-all duration-300 glow"
-          >
-            Explore All Experiments <ArrowRight className="w-4 h-4 ml-2" />
-          </motion.button>
-        </motion.div>
+          Explore all experiments <ArrowRight className="h-4 w-4" />
+        </a>
       </div>
     </section>
   );

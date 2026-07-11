@@ -1,79 +1,148 @@
-const projects = [
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
+import { ExternalLink, Star } from "lucide-react";
+import { SectionHeading } from "@/components/ui/section-heading";
+import { GithubIcon } from "@/components/ui/brand-icons";
+import { cn } from "@/lib/utils";
+
+type Project = {
+  id: number;
+  name: string;
+  description: string;
+  why: string;
+  stars: string;
+  tech: string[];
+  source: string;
+  demo?: string;
+  featured?: boolean;
+};
+
+const projects: Project[] = [
   {
     id: 1,
     name: "tirtha/wms",
-    stars: "★ 234 · java",
-    description: "Warehouse Management System designed to streamline inventory and order operations for medium-scale businesses.",
-    why: "why it matters: handles high-volume inventory transactions with eventual consistency patterns and optimized PostgreSQL queries for real-time stock tracking.",
-    links: [
-      { text: "View source →", href: "https://github.com/tirthachetry-zoho/warehouse-management" },
-    ],
+    description:
+      "Warehouse Management System designed to streamline inventory and order operations for medium-scale businesses.",
+    why: "Handles high-volume inventory transactions with eventual-consistency patterns and optimized PostgreSQL queries for real-time stock tracking.",
+    stars: "★ 234",
+    tech: ["Java", "Spring Boot", "PostgreSQL", "Kafka"],
+    source: "https://github.com/tirthachetry-zoho/warehouse-management",
+    demo: "https://github.com/tirthachetry-zoho/warehouse-management",
+    featured: true,
   },
   {
     id: 2,
     name: "tirtha/oms",
-    stars: "★ 189 · java",
-    description: "Backend contribution to enterprise telecom order management system handling high-throughput transactions.",
-    why: "why it mattered: implemented Kafka-based event sourcing for order state changes, reducing database load by 40% during peak hours.",
-    links: [
-      { text: "View source →", href: "https://github.com/tirthachetry-zoho/order-management" },
-    ],
+    description:
+      "Backend contribution to an enterprise telecom order management system handling high-throughput transactions.",
+    why: "Implemented Kafka-based event sourcing for order state changes, reducing database load by 40% during peak hours.",
+    stars: "★ 189",
+    tech: ["Java", "Kafka", "Redis", "Quarkus"],
+    source: "https://github.com/tirthachetry-zoho/order-management",
   },
   {
     id: 3,
     name: "tirtha/school-mgmt",
-    stars: "★ 567 · fullstack",
-    description: "Full-featured school website with admin panel for managing students, faculty, and academic content.",
-    why: "why it exists: demonstrates full-stack capabilities with React frontend and Node.js backend, implementing role-based access control and real-time notifications.",
-    links: [
-      { text: "View source →", href: "https://github.com/tirthachetry-zoho/school-management" },
-    ],
+    description:
+      "Full-featured school platform with an admin panel for managing students, faculty, and academic content.",
+    why: "Demonstrates full-stack capabilities with a React frontend and Node.js backend, including role-based access control and real-time notifications.",
+    stars: "★ 567",
+    tech: ["React", "Node.js", "TypeScript", "PostgreSQL"],
+    source: "https://github.com/tirthachetry-zoho/school-management",
+    demo: "https://github.com/tirthachetry-zoho/school-management",
   },
 ];
 
 export function Projects() {
-  return (
-    <section id="projects" className="mb-17">
-      <div className="eyebrow">// work — three things I'd defend in an interview</div>
-      <h2 className="text-[1.6rem] font-bold mb-[18px]">Selected projects</h2>
+  const reduce = useReducedMotion();
 
-      {projects.map((project) => (
-        <div
-          key={project.id}
-          className="bg-[var(--card)] border border-[var(--rule)] rounded-md p-[26px_28px] mb-[22px] relative"
-        >
-          <div className="flex justify-between items-baseline gap-4 flex-wrap">
-            <div className="mono font-bold text-[1.05rem]">
-              {project.name.split('/').map((part, i, arr) => (
-                <span key={i}>
-                  {i > 0 && <span className="text-[var(--ink-soft)] font-normal">/</span>}
-                  {part}
+  return (
+    <section id="projects" className="scroll-mt-24 py-16">
+      <SectionHeading
+        eyebrow="// work"
+        title="Selected projects"
+        description="A few things I'd happily defend in an interview."
+      />
+
+      <div className="space-y-6">
+        {projects.map((project, i) => (
+          <motion.article
+            key={project.id}
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5, delay: i * 0.08 }}
+            className={cn(
+              "group relative rounded-xl border bg-surface/60 p-6 transition-colors sm:p-7",
+              "hover:border-primary/50",
+              project.featured ? "border-primary/30" : "border-border"
+            )}
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex items-center gap-3">
+                <h3 className="mono text-lg font-bold text-foreground">
+                  {project.name}
+                </h3>
+                {project.featured && (
+                  <span className="rounded-full border border-primary/40 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wider text-primary">
+                    Featured
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="mono flex items-center gap-1 text-sm text-muted-foreground">
+                  <Star className="h-3.5 w-3.5 text-primary" />
+                  {project.stars}
                 </span>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={project.source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${project.name} source on GitHub`}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                  >
+                    <GithubIcon className="h-4 w-4" />
+                    Code
+                  </a>
+                  {project.demo && (
+                    <a
+                      href={project.demo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${project.name} live demo`}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-background transition-transform hover:-translate-y-0.5"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Demo
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-foreground/90">
+              {project.description}
+            </p>
+
+            <p className="mt-3 border-l-2 border-primary/60 pl-3 text-sm leading-relaxed text-muted-foreground">
+              {project.why}
+            </p>
+
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {project.tech.map((tech) => (
+                <li
+                  key={tech}
+                  className="chip"
+                >
+                  {tech}
+                </li>
               ))}
-            </div>
-            <div className="mono text-[0.78rem] text-[var(--ink-soft)]">
-              {project.stars}
-            </div>
-          </div>
-          <p className="my-3 text-[0.98rem]">{project.description}</p>
-          <div className="border-l-2 border-[var(--moss)] pl-[14px] mono text-[0.82rem] text-[var(--ink-soft)] leading-[1.6]">
-            {project.why}
-          </div>
-          <div className="mt-4 flex gap-[18px] mono text-[0.78rem]">
-            {project.links.map((link) => (
-              <a
-                key={link.text}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[var(--rust)] border-b border-transparent hover:border-[var(--rust)]"
-              >
-                {link.text}
-              </a>
-            ))}
-          </div>
-        </div>
-      ))}
+            </ul>
+          </motion.article>
+        ))}
+      </div>
     </section>
   );
 }

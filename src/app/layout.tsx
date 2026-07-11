@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
-import { Source_Serif_4, JetBrains_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/components/footer";
+import { Navigation } from "@/components/navigation";
 import "highlight.js/styles/github-dark.css";
 
-const sourceSerif = Source_Serif_4({
-  variable: "--font-serif",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
-  axes: ["opsz"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -17,15 +17,33 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const siteUrl = "https://tirthachetry.dpdns.org";
+
 export const metadata: Metadata = {
-  title: "Engineering Blogs by Tirtha",
-  description: "Engineering insights, architecture patterns, and practical lessons from building scalable distributed systems across FinTech, OMS, and WMS.",
-  keywords: ["Software Engineering", "Distributed Systems", "Architecture", "Spring Boot", "Kafka", "Cloud", "System Design"],
-  authors: [{ name: "Tirtha" }],
-  creator: "Tirtha",
-  metadataBase: new URL("https://tirthachetry.dpdns.org"),
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Tirtha Chetry | AI Engineer & Software Developer",
+    template: "%s | Tirtha Chetry",
+  },
+  description:
+    "Tirtha Chetry — AI Engineer and Software Developer building scalable distributed systems, agentic AI, and developer tooling. Java, Spring Boot, Kafka, AWS, and LLM systems.",
+  applicationName: "Tirtha Chetry — Portfolio",
+  keywords: [
+    "AI Engineer",
+    "Software Developer",
+    "Distributed Systems",
+    "Java",
+    "Spring Boot",
+    "Kafka",
+    "Cloud",
+    "System Design",
+    "Agentic AI",
+    "Open Source",
+  ],
+  authors: [{ name: "Tirtha Chetry" }],
+  creator: "Tirtha Chetry",
   alternates: {
-    canonical: "https://tirthachetry.dpdns.org",
+    canonical: "/",
   },
   icons: {
     icon: "/icon.svg",
@@ -34,15 +52,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://tirthachetry.dpdns.org",
-    title: "Engineering Blogs by Tirtha",
-    description: "Engineering insights, architecture patterns, and practical lessons from building scalable distributed systems across FinTech, OMS, and WMS.",
-    siteName: "Engineering Blogs by Tirtha",
+    url: siteUrl,
+    siteName: "Tirtha Chetry",
+    title: "Tirtha Chetry | AI Engineer & Software Developer",
+    description:
+      "Building scalable distributed systems, agentic AI, and developer tooling.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Engineering Blogs by Tirtha",
-    description: "Engineering insights, architecture patterns, and practical lessons from building scalable distributed systems across FinTech, OMS, and WMS.",
+    title: "Tirtha Chetry | AI Engineer & Software Developer",
+    description:
+      "Building scalable distributed systems, agentic AI, and developer tooling.",
     creator: "@tirthachetry",
   },
   robots: {
@@ -51,11 +71,15 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
     },
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a192f",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -65,26 +89,23 @@ export default function RootLayout({
 }>) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Engineering Blogs by Tirtha",
-    "url": "https://tirthachetry.dpdns.org",
-    "description": "Engineering insights, architecture patterns, and practical lessons from building scalable distributed systems across FinTech, OMS, and WMS.",
-    "author": {
-      "@type": "Person",
-      "name": "Tirtha",
-      "url": "https://tirthachetry.dpdns.org"
-    },
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://tirthachetry.dpdns.org/articles?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
+    "@type": "Person",
+    name: "Tirtha Chetry",
+    url: siteUrl,
+    jobTitle: "AI Engineer & Software Developer",
+    sameAs: [
+      "https://github.com/tirthachetry-zoho",
+      "https://linkedin.com/in/tirthachetry",
+      "https://x.com/tirthachetry",
+    ],
+    description:
+      "AI Engineer and Software Developer focused on distributed systems and agentic AI.",
   };
 
   return (
     <html
       lang="en"
-      className={`${sourceSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>
         <script
@@ -93,7 +114,16 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans">
-        <main className="flex-1">{children}</main>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:text-primary focus:outline focus:outline-2 focus:outline-primary"
+        >
+          Skip to content
+        </a>
+        <Navigation />
+        <main id="main" className="flex-1">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>
